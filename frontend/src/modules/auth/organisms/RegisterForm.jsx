@@ -1,4 +1,3 @@
-// src/modules/auth/organisms/RegisterForm.jsx
 import Card from "@ds/atoms/Card.jsx";
 import TextField from "@ds/molecules/TextField.jsx";
 import Button from "@ds/atoms/Button.jsx";
@@ -9,36 +8,28 @@ export default function RegisterForm({ onSubmit }) {
     useRegisterForm({ onSubmit });
 
   return (
-    <Card title="Register" className="h-100">
+    <Card title="Crear cuenta" className="h-100">
       <form noValidate onSubmit={handleSubmit}>
         <TextField
-          id="reg-name"
-          label="Full name"
-          value={form.name}
-          onChange={handleChange("name")}
-          placeholder="Jane Doe"
-          error={errors.name}
-        />
-        <TextField
           id="reg-username"
-          label="Username"
+          label="Nombre de usuario"
           value={form.username}
           onChange={handleChange("username")}
-          placeholder="your.username"
+          placeholder="tu.usuario"
           error={errors.username}
         />
         <TextField
           id="reg-email"
-          label="Email"
+          label="Correo"
           type="email"
           value={form.email}
           onChange={handleChange("email")}
-          placeholder="you@example.com"
+          placeholder="tucorreo@ejemplo.com"
           error={errors.email}
         />
         <TextField
           id="reg-password"
-          label="Password"
+          label="Contraseña"
           type="password"
           value={form.password}
           onChange={handleChange("password")}
@@ -47,7 +38,7 @@ export default function RegisterForm({ onSubmit }) {
         />
         <TextField
           id="reg-confirm"
-          label="Confirm password"
+          label="Confirmar contraseña"
           type="password"
           value={form.confirm}
           onChange={handleChange("confirm")}
@@ -60,7 +51,7 @@ export default function RegisterForm({ onSubmit }) {
           className="w-100"
           disabled={submitting}
         >
-          {submitting ? "Creating..." : "Create account"}
+          {submitting ? "Creando..." : "Crear cuenta"}
         </Button>
       </form>
     </Card>

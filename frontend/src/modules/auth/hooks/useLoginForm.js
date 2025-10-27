@@ -1,10 +1,13 @@
+// Mensajes en español; helpers de validate.js
 import { useState, useCallback } from "react";
-import { s, isUsername, requiredMsg, usernameMsg } from "@utils/validate.js";
+import { s, isUsername, requiredMsg as _req } from "@utils/validate.js";
 
 export default function useLoginForm({ onSubmit } = {}) {
   const [form, setForm] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  const requiredMsg = (field) => `${field} es obligatorio.`;
 
   const setField = useCallback((name, value) => {
     setForm((f) => ({ ...f, [name]: value }));
@@ -21,10 +24,11 @@ export default function useLoginForm({ onSubmit } = {}) {
     const username = s(form.username);
     const password = s(form.password);
 
-    if (!username) er.username = requiredMsg("Username");
-    else if (!isUsername(username)) er.username = usernameMsg;
+    if (!username) er.username = requiredMsg("El nombre de usuario");
+    else if (!isUsername(username))
+      er.username = "Usa 3+ caracteres: letras, números, . _ -";
 
-    if (!password) er.password = requiredMsg("Password");
+    if (!password) er.password = requiredMsg("La contraseña");
 
     setErrors(er);
     return Object.keys(er).length === 0;
@@ -36,7 +40,6 @@ export default function useLoginForm({ onSubmit } = {}) {
       if (!validate()) return;
       try {
         setSubmitting(true);
-        // Normaliza antes de enviar (trim)
         const payload = {
           username: s(form.username),
           password: s(form.password),

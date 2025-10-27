@@ -1,19 +1,9 @@
+// Mensajes en español; sin "name"
 import { useState, useCallback } from "react";
-import {
-  s,
-  isEmail,
-  isUsername,
-  minLen,
-  requiredMsg,
-  minLenMsg,
-  usernameMsg,
-  emailMsg,
-  passwordMismatchMsg,
-} from "@utils/validate.js";
+import { s, isEmail, isUsername, minLen } from "@utils/validate.js";
 
 export default function useRegisterForm({ onSubmit } = {}) {
   const [form, setForm] = useState({
-    name: "",
     username: "",
     email: "",
     password: "",
@@ -21,6 +11,8 @@ export default function useRegisterForm({ onSubmit } = {}) {
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  const required = (f) => `${f} es obligatorio.`;
 
   const setField = useCallback((name, value) => {
     setForm((f) => ({ ...f, [name]: value }));
@@ -34,26 +26,25 @@ export default function useRegisterForm({ onSubmit } = {}) {
 
   const validate = useCallback(() => {
     const er = {};
-    const name = s(form.name);
     const username = s(form.username);
     const email = s(form.email);
     const password = s(form.password);
     const confirm = s(form.confirm);
 
-    if (!name) er.name = requiredMsg("Full name");
+    if (!username) er.username = required("El nombre de usuario");
+    else if (!isUsername(username))
+      er.username = "Usa 3+ caracteres: letras, números, . _ -";
 
-    if (!username) er.username = requiredMsg("Username");
-    else if (!isUsername(username)) er.username = usernameMsg;
+    if (!email) er.email = required("El correo");
+    else if (!isEmail(email)) er.email = "Correo inválido.";
 
-    if (!email) er.email = requiredMsg("Email");
-    else if (!isEmail(email)) er.email = emailMsg;
+    if (!password) er.password = required("La contraseña");
+    else if (!minLen(password, 6))
+      er.password = "La contraseña debe tener al menos 6 caracteres.";
 
-    if (!password) er.password = requiredMsg("Password");
-    else if (!minLen(password, 6)) er.password = minLenMsg("Password", 6);
-
-    if (!confirm) er.confirm = requiredMsg("Confirm password");
+    if (!confirm) er.confirm = required("La confirmación");
     else if (password && confirm && password !== confirm)
-      er.confirm = passwordMismatchMsg;
+      er.confirm = "Las contraseñas no coinciden.";
 
     setErrors(er);
     return Object.keys(er).length === 0;
@@ -65,9 +56,7 @@ export default function useRegisterForm({ onSubmit } = {}) {
       if (!validate()) return;
       try {
         setSubmitting(true);
-        // Normaliza antes de enviar (trim)
         const payload = {
-          name: s(form.name),
           username: s(form.username),
           email: s(form.email),
           password: s(form.password),

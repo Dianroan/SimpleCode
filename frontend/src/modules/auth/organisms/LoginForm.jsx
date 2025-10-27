@@ -1,4 +1,3 @@
-// src/modules/auth/organisms/LoginForm.jsx
 import Card from "@ds/atoms/Card.jsx";
 import TextField from "@ds/molecules/TextField.jsx";
 import Button from "@ds/atoms/Button.jsx";
@@ -10,19 +9,19 @@ export default function LoginForm({ onSubmit }) {
   );
 
   return (
-    <Card title="Log in" className="h-100">
+    <Card title="Iniciar sesión" className="h-100">
       <form noValidate onSubmit={handleSubmit}>
         <TextField
           id="login-username"
-          label="Username"
+          label="Nombre de usuario"
           value={form.username}
           onChange={handleChange("username")}
-          placeholder="your.username"
+          placeholder="tu.usuario"
           error={errors.username}
         />
         <TextField
           id="login-password"
-          label="Password"
+          label="Contraseña"
           type="password"
           value={form.password}
           onChange={handleChange("password")}
@@ -30,7 +29,7 @@ export default function LoginForm({ onSubmit }) {
           error={errors.password}
         />
         <Button type="submit" className="w-100" disabled={submitting}>
-          {submitting ? "Signing in..." : "Sign in"}
+          {submitting ? "Entrando..." : "Entrar"}
         </Button>
       </form>
     </Card>
