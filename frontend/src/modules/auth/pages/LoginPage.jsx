@@ -1,11 +1,22 @@
 import LoginForm from "@modules/auth/organisms/LoginForm.jsx";
 import Button from "@ds/atoms/Button.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { loginApi } from "@services/api/auth.js";
 
 export default function LoginPage() {
+  const nav = useNavigate();
+  const [serverError, setServerError] = useState("");
+
   const handleLogin = async (payload) => {
-    console.log("LOGIN payload", payload);
-    alert(`Sesión iniciada para: ${payload.username}`);
+    setServerError("");
+    try {
+      const { token } = await loginApi(payload);
+      localStorage.setItem("token", token);
+      nav("/dashboard");
+    } catch (e) {
+      setServerError(e.message || "Error al iniciar sesión.");
+    }
   };
 
   return (
@@ -13,11 +24,13 @@ export default function LoginPage() {
       <div className="row justify-content-center w-100">
         <div className="col-12 col-md-10 col-lg-6">
           <h1 className="mb-2">Iniciar sesión</h1>
-          <p className="text-muted mb-4">
+          <p className="text-muted mb-3">
             Ingresa tus credenciales para acceder.
           </p>
+          {serverError && (
+            <div className="alert alert-danger">{serverError}</div>
+          )}
 
-          {/* Card + link en un mismo flujo vertical */}
           <div className="d-flex flex-column gap-3">
             <LoginForm onSubmit={handleLogin} />
 

@@ -10,9 +10,10 @@ export const validate = (schema) => (req, res, next) => {
     next();
   } catch (err) {
     if (err instanceof ZodError) {
-      return res
-        .status(400)
-        .json({ error: "ValidationError", details: err.errors });
+      return res.status(400).json({
+        error: "ValidationError",
+        details: err.errors,
+      });
     }
     next(err);
   }
