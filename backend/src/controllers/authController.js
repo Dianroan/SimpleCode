@@ -1,3 +1,4 @@
+// backend/src/controllers/authController.js
 import jwt from "jsonwebtoken";
 import { pool } from "../db/pool.js";
 import { env } from "../config/env.js";
@@ -8,30 +9,31 @@ export const register = async (req, res) => {
   const { username, email, password } = req.validated.body;
 
   try {
-    // Check duplicates
+    // ¿ya existe usuario o email?
     const [dup] = await pool.query(
       "SELECT id FROM users WHERE username=? OR email=? LIMIT 1",
       [username, email]
     );
-    if (dup.length)
+    if (dup.length) {
       return res
         .status(409)
-        .json({ message: "El usuario o correo ya existe." });
+        .json({ message: "El usuario o correo ya están registrados." });
+    }
 
-    const password_hash = await hashPassword(password);
+    // ⚠️ ahora usamos la columna password (no password_hash)
+    const hashed = await hashPassword(password);
+
     await pool.query(
-      "INSERT INTO users (username, email, password_hash) VALUES (?,?,?)",
-      [username, email, password_hash]
+      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+      [username, email, hashed]
     );
 
     return res.status(201).json({ message: "Cuenta creada." });
   } catch (err) {
     console.error("[AUTH ERROR]", err?.code, err?.message, err?.sqlMessage);
-    return res
-      .status(500)
-      .json({
-        message: `Error interno del servidor (${err?.code || "UNKNOWN"})`,
-      });
+    return res.status(500).json({
+      message: `Error interno del servidor (${err?.code || "UNKNOWN"})`,
+    });
   }
 };
 
@@ -40,25 +42,38 @@ export const login = async (req, res) => {
   const { username, password } = req.validated.body;
 
   try {
+    // acepta login por username o email en el mismo campo "username"
     const [rows] = await pool.query(
-      "SELECT id, username, password_hash FROM users WHERE username=? LIMIT 1",
-      [username]
+      `SELECT id, username, email, password, role, created_at
+       FROM users
+       WHERE username = ? OR email = ?
+       LIMIT 1`,
+      [username, username]
     );
-    if (!rows.length)
+
+    if (!rows.length) {
       return res.status(401).json({ message: "Credenciales inválidas." });
+    }
 
     const user = rows[0];
-    const ok = await comparePassword(password, user.password_hash);
-    if (!ok)
-      return res.status(401).json({ message: "Credenciales inválidas." });
 
+    // 🔐 comparamos contra user.password (hash Bcrypt)
+    const ok = await comparePassword(password, user.password);
+    if (!ok) {
+      return res.status(401).json({ message: "Credenciales inválidas." });
+    }
+
+    // JWT para el front (usas Bearer en Authorization)
     const token = jwt.sign(
       { sub: user.id, username: user.username },
       env.jwtSecret,
-      { expiresIn: "1d" }
+      { expiresIn: "1h" }
     );
 
-    return res.json({ token });
+    // nunca regreses el password
+    const { password: _hide, ...safe } = user;
+
+    return res.json({ token, user: safe });
   } catch (err) {
     console.error("[AUTH ERROR]", err?.code, err?.message, err?.sqlMessage);
     return res.status(500).json({
@@ -69,10 +84,14 @@ export const login = async (req, res) => {
 
 /* ──────────────── ME ──────────────── */
 export const me = async (req, res) => {
+  // este endpoint está protegido por requireAuth (Bearer)
+  const id = req.user?.sub;
+  if (!id) return res.status(401).json({ message: "No autorizado." });
+
   try {
-    const id = req.user?.sub;
+    // No incluyas password en el SELECT
     const [rows] = await pool.query(
-      "SELECT id, username, email, created_at FROM users WHERE id=? LIMIT 1",
+      "SELECT id, username, email, role, created_at FROM users WHERE id=? LIMIT 1",
       [id]
     );
     if (!rows.length)
