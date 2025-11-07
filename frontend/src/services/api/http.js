@@ -1,29 +1,32 @@
-// src/services/api/http.js
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+// frontend/src/services/http.js
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
-export async function request(path, { method = "GET", body, auth = false } = {}) {
-  const headers = { "Content-Type": "application/json" };
+export async function request(path, options = {}) {
+  const url = path.startsWith("http") ? path : `${BASE_URL}${path}`;
+  const { method = "GET", headers = {}, body } = options;
 
-  if (auth) {
-    // 👇 leer SIEMPRE del localStorage
-    const token = localStorage.getItem("token");
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-  }
+  // ⬇️ lee token en cada request (clave para “segundo login”)
+  const token = localStorage.getItem("token");
+  const authHeaders = { ...headers };
+  if (token) authHeaders.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(url, {
     method,
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders,
+    },
     body: body ? JSON.stringify(body) : undefined,
+    credentials: "omit", // no usamos cookies httpOnly
   });
 
-  const isJson = res.headers.get("content-type")?.includes("application/json");
-  const data = isJson ? await res.json() : null;
+  // Manejo estándar de JSON
+  const isJSON = (res.headers.get("content-type") || "").includes("application/json");
+  const data = isJSON ? await res.json().catch(() => ({})) : null;
 
   if (!res.ok) {
-    throw new Error(data?.message || "Error de servidor.");
+    const message = data?.message || `HTTP ${res.status}`;
+    throw new Error(message);
   }
-
   return data;
 }

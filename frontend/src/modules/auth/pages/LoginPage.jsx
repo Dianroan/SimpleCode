@@ -11,12 +11,18 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
+  // src/modules/auth/pages/LoginPage.jsx
   const handleLogin = async ({ username, password }) => {
     setError("");
     try {
       const { token } = await loginApi({ username, password });
-      const me = await meApi();    // 👈 pedimos el usuario
-      await login(token, me);      // 👈 lo metemos al contexto
+
+      localStorage.setItem("token", token);
+
+      const { user } = await meApi();
+
+      await login(token, user);
+
       navigate("/dashboard", { replace: true });
     } catch (e) {
       setError(e.message || "No se pudo iniciar sesión.");
@@ -28,9 +34,13 @@ export default function LoginPage() {
       <div className="row justify-content-center w-100">
         <div className="col-12 col-md-10 col-lg-6">
           <h1 className="mb-2">Iniciar sesión</h1>
-          <p className="text-muted mb-3">Ingresa tus credenciales para acceder.</p>
+          <p className="text-muted mb-3">
+            Ingresa tus credenciales para acceder.
+          </p>
 
-          {error && <div className="alert alert-danger">{error.message || error}</div>}
+          {error && (
+            <div className="alert alert-danger">{error.message || error}</div>
+          )}
 
           <div className="d-flex flex-column gap-3">
             <LoginForm onSubmit={handleLogin} />

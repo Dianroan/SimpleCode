@@ -1,26 +1,27 @@
-// src/services/api/auth.js
-import { request } from "./http.js";
+// frontend/src/services/api/auth.js
+import { request } from "./http";
 
-/** Inicia sesión y devuelve { token } */
-export async function loginApi({ username, password }) {
-  return request("/api/auth/login", {
+export function loginApi(payload) {
+  // backend debe devolver { token, user }
+  return request("/auth/login", {
     method: "POST",
-    body: { username, password },
+    body: payload,
   });
 }
 
-/** Registra usuario y devuelve { message } */
-export async function registerApi({ username, email, password, confirm }) {
-  return request("/api/auth/register", {
+export function registerApi(payload) {
+  return request("/auth/register", {
     method: "POST",
-    body: { username, email, password, confirm },
+    body: payload,
   });
 }
 
-/** Obtiene info del usuario autenticado { id, username, email, created_at } */
-export async function meApi() {
-  return request("/api/auth/me", {
-    method: "GET",
-    auth: true,
-  });
+export function meApi() {
+  // requiere Bearer (lo añade http.js leyendo localStorage)
+  return request("/auth/me");
+}
+
+export function logoutApi() {
+  // si tu backend expone logout; si no, puedes omitir esto
+  return request("/auth/logout", { method: "POST" });
 }
