@@ -9,7 +9,7 @@ export const minLen = (v, n) => s(v).length >= n;
 // Helpers de mensajes (opcional)
 export const requiredMsg = (name = "Field") => `${name} is required.`;
 export const minLenMsg = (name, n) =>
-  `${name} must be at least ${n} characters.`;
-export const usernameMsg = "Use 3+ chars: letters, numbers, . _ -";
-export const emailMsg = "Invalid email.";
-export const passwordMismatchMsg = "Passwords do not match.";
+  `${name} debe tener al menos ${n} caracteres.`;
+export const usernameMsg = "Usa al menos 3 caracteres: letras, números, . _ -";
+export const emailMsg = "Email invalido";
+export const passwordMismatchMsg = "Las contraseñas no coinciden.";
