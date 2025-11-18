@@ -14,6 +14,7 @@ import RutaPage from "@modules/ruta/pages/RutaPage.jsx";
 
 import TeoriaPage from "@modules/ruta/pages/TeoriaPage.jsx";
 import PracticaPage from "@modules/ruta/pages/PracticaPage.jsx";
+import LearningPathPage from "../modules/ruta/pages/LearningPathPage";
 
 const Cursos = () => <div className="p-3">Cursos</div>;
 const Desafios = () => <div className="p-3">Desafíos</div>;

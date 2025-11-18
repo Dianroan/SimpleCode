@@ -1,61 +1,95 @@
+// src/modules/ruta/components/RutaPath.jsx
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { steps } from "../data/mockSteps.js";
+
+import { getLearningPathApi } from "@services/api/learningPath.js";
 import StepDot from "./StepDot.jsx";
 import StepCard from "./StepCard.jsx";
 
 export default function RutaPath() {
   const navigate = useNavigate();
 
-  const goTo = (s) => {
-    if (s.kind === "theory") navigate(`/teoria/${s.id}`);
-    else navigate(`/practica/${s.id}`);
+  const [steps, setSteps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await getLearningPathApi();
+
+        // data debería ser algo tipo:
+        // [{ id, title, activity_type: 'THEORY' | 'EXERCISE', step_order, status }, ...]
+        // Lo ordenamos por step_order por si acaso.
+        const ordered = [...data].sort((a, b) => a.step_order - b.step_order);
+        setSteps(ordered);
+      } catch (e) {
+        console.error(e);
+        setError(e.message || "No se pudo cargar la ruta de aprendizaje.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const goTo = (step) => {
+    if (!step) return;
+    if (step.activity_type === "THEORY") {
+      navigate(`/teoria/${step.id}`);
+    } else if (step.activity_type === "EXERCISE") {
+      navigate(`/practica/${step.id}`);
+    }
   };
 
   return (
-    <div className="w-100 d-flex flex-column align-items-center py-4 position-relative">
-      {/* header derecho */}
-      <div className="w-100 d-flex align-items-center justify-content-end gap-3 px-3">
-        <div className="d-flex align-items-center gap-1">
-          <span style={{ fontSize: 22 }}>🔥</span>
-          <span className="fw-bold">3</span>
-        </div>
-        <div
-          className="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center"
-          style={{ width: 32, height: 32 }}
-        >
-          <span role="img" aria-label="profile">
-            👤
-          </span>
-        </div>
-      </div>
+    <div className="container py-4">
+      <h1 className="mb-3">Ruta de aprendizaje</h1>
+      <p className="text-muted mb-4">
+        Estos pasos vienen directamente de la base de datos (tabla{" "}
+        <code>courses</code>).
+      </p>
 
-      {/* camino zig-zag */}
-      <div className="w-100" style={{ maxWidth: 780 }}>
-        {steps.map((s, idx) => {
-          const left = idx % 2 === 0;
-          return (
-            <div key={s.id} className="my-4 d-flex" style={{ minHeight: 80 }}>
-              <div className={left ? "flex-grow-0 me-auto" : "ms-auto"}>
-                <div className="d-flex align-items-center gap-3">
-                  {left && (
-                    <div onClick={() => goTo(s)} style={{ cursor: "pointer" }}>
-                      <StepDot kind={s.kind} />
-                    </div>
-                  )}
-                  <div onClick={() => goTo(s)} style={{ cursor: "pointer" }}>
-                    <StepCard kind={s.kind} title={s.title} />
-                  </div>
-                  {!left && (
-                    <div onClick={() => goTo(s)} style={{ cursor: "pointer" }}>
-                      <StepDot kind={s.kind} />
-                    </div>
-                  )}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
+
+      {loading && <p>Cargando ruta...</p>}
+
+      {!loading && !error && steps.length === 0 && (
+        <p>No hay actividades configuradas en la ruta todavía.</p>
+      )}
+
+      {!loading && !error && steps.length > 0 && (
+        <div className="d-flex flex-column gap-3 mt-3">
+          {steps.map((step, index) => {
+            const kind =
+              step.activity_type === "THEORY" ? "theory" : "practice";
+
+            return (
+              <div
+                key={step.id}
+                className="d-flex align-items-center gap-3"
+                style={{ cursor: "pointer" }}
+                onClick={() => goTo(step)}
+              >
+                <StepDot kind={kind} />
+                <div className="flex-grow-1">
+                  <StepCard kind={kind} title={step.title} />
                 </div>
+                <small className="text-muted">
+                  Paso {step.step_order}
+                  {step.status === "COMPLETED" && " · Completado"}
+                  {step.status === "IN_PROGRESS" && " · En progreso"}
+                </small>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
