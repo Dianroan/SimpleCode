@@ -3,7 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-csharp";
 import "ace-builds/src-noconflict/theme-github";
-import { getExerciseApi, validateExerciseApi } from "../../../services/api/exercises";
+import {
+  getExerciseApi,
+  validateExerciseApi,
+} from "../../../services/api/exercises";
 import "./PracticaPage.css";
 
 export default function PracticaPage() {
@@ -56,7 +59,7 @@ export default function PracticaPage() {
           success: true,
           message: "¡Correcto! Todos los tests pasaron.",
           passed: result.passed_tests,
-          total: result.total_tests
+          total: result.total_tests,
         });
       } else {
         // RQF19: Mensaje de fallo con X/Y tests
@@ -64,7 +67,7 @@ export default function PracticaPage() {
           success: false,
           message: `${result.passed_tests}/${result.total_tests} tests pasados`,
           passed: result.passed_tests,
-          total: result.total_tests
+          total: result.total_tests,
         });
       }
 
@@ -136,7 +139,7 @@ export default function PracticaPage() {
                 fontSize: 14,
                 fontFamily: "'Courier New', monospace",
                 showLineNumbers: true,
-                tabSize: 4
+                tabSize: 4,
               }}
               style={{ width: "100%", height: "400px" }}
             />
@@ -155,10 +158,7 @@ export default function PracticaPage() {
 
             {/* RQF20: Botón "Completar" - condicional */}
             {isCompleted ? (
-              <button
-                className="btn btn-success"
-                onClick={handleCompletar}
-              >
+              <button className="btn btn-success" onClick={handleCompletar}>
                 Completar
               </button>
             ) : (
@@ -181,17 +181,17 @@ export default function PracticaPage() {
           {output && (
             <div className="output-section">
               <h3>Output de Consola</h3>
-              <textarea
-                className="output-console"
-                readOnly
-                value={output}
-              />
+              <textarea className="output-console" readOnly value={output} />
             </div>
           )}
 
           {/* RQF19: Sección de resultado de tests */}
           {testResult && (
-            <div className={`test-result ${testResult.success ? "success" : "failure"}`}>
+            <div
+              className={`test-result ${
+                testResult.success ? "success" : "failure"
+              }`}
+            >
               <p className="test-message">{testResult.message}</p>
               <p className="test-count">
                 {testResult.passed}/{testResult.total} tests pasados

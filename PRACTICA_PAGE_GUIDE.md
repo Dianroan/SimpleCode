@@ -11,9 +11,11 @@ Toda la infraestructura para la **Página de Práctica de Ejercicios** ha sido i
 ### Backend (Node.js/Express)
 
 #### Endpoint: `GET /api/exercises/:id`
+
 Retorna un ejercicio completo con sus test cases.
 
 **Respuesta:**
+
 ```json
 {
   "id": 9,
@@ -35,9 +37,11 @@ Retorna un ejercicio completo con sus test cases.
 ```
 
 #### Endpoint: `POST /api/exercises/:id/validate`
+
 Valida el código del usuario contra todos los tests.
 
 **Request:**
+
 ```json
 {
   "code": "using System;\npublic class Program {\n  public static int Sumar(int a, int b) {\n    return a + b;\n  }\n  public static void Main(string[] args) {\n    Console.WriteLine(Sumar(3, 5));\n  }\n}"
@@ -45,6 +49,7 @@ Valida el código del usuario contra todos los tests.
 ```
 
 **Respuesta (exitosa):**
+
 ```json
 {
   "is_successful": true,
@@ -60,6 +65,7 @@ Valida el código del usuario contra todos los tests.
 ```
 
 **Lógica de Validación:**
+
 1. ✅ Valida que `required_keywords` estén en el código
 2. ✅ Inyecta `Console.WriteLine()` en el `Main()` con test inputs
 3. ✅ Llama JDoodle API para compilar y ejecutar
@@ -77,24 +83,25 @@ Valida el código del usuario contra todos los tests.
 
 **Características Implementadas:**
 
-| Req | Descripción | Implementación |
-|-----|-------------|-----------------|
-| RQF13 | Mostrar descripción problema (HTML) | `dangerouslySetInnerHTML` con `statement` |
-| RQF14 | - | - |
-| RQF15 | Ace Editor con template | `AceEditor` en modo C#, cargado con `code_template` |
-| RQF16 | Botón "¡Probar!" | onClick → `handleProbarClick()` |
-| RQF17 | Llamar JDoodle vía backend | POST a `/api/exercises/:id/validate` |
-| RQF18 | Mostrar console output | `<textarea readOnly>` con `output` |
-| RQF19 | Mostrar X/Y tests pasados | Componente `.test-result` con contador |
-| RQF20 | Botón "Completar" condicional | Habilitado si `is_successful === true` |
-| RQF21 | Validar keywords | Validación en backend, hint visual en frontend |
-| RQF22 | Guardar intento en BD | Backend inserta en `exercise_attempts` |
+| Req   | Descripción                         | Implementación                                      |
+| ----- | ----------------------------------- | --------------------------------------------------- |
+| RQF13 | Mostrar descripción problema (HTML) | `dangerouslySetInnerHTML` con `statement`           |
+| RQF14 | -                                   | -                                                   |
+| RQF15 | Ace Editor con template             | `AceEditor` en modo C#, cargado con `code_template` |
+| RQF16 | Botón "¡Probar!"                    | onClick → `handleProbarClick()`                     |
+| RQF17 | Llamar JDoodle vía backend          | POST a `/api/exercises/:id/validate`                |
+| RQF18 | Mostrar console output              | `<textarea readOnly>` con `output`                  |
+| RQF19 | Mostrar X/Y tests pasados           | Componente `.test-result` con contador              |
+| RQF20 | Botón "Completar" condicional       | Habilitado si `is_successful === true`              |
+| RQF21 | Validar keywords                    | Validación en backend, hint visual en frontend      |
+| RQF22 | Guardar intento en BD               | Backend inserta en `exercise_attempts`              |
 
 ---
 
 ## 📋 Tablas de Base de Datos
 
 ### `exercise_activities`
+
 ```sql
 - id (INT)
 - title (VARCHAR)
@@ -106,6 +113,7 @@ Valida el código del usuario contra todos los tests.
 ```
 
 ### `exercise_tests`
+
 ```sql
 - id (INT)
 - exercise_id (INT) -- FK a exercise_activities
@@ -116,6 +124,7 @@ Valida el código del usuario contra todos los tests.
 ```
 
 ### `exercise_attempts`
+
 ```sql
 - id (INT)
 - user_id (INT) -- FK a users
@@ -226,6 +235,7 @@ frontend/
 ### Variables de Entorno (Backend)
 
 El archivo `.env` debe tener:
+
 ```
 JDOODLE_CLIENT_ID=xxxxx
 JDOODLE_CLIENT_SECRET=xxxxx
@@ -234,6 +244,7 @@ JDOODLE_CLIENT_SECRET=xxxxx
 ### CORS
 
 El backend ya está configurado para permitir:
+
 - `http://localhost:5173` (frontend dev)
 
 ---
@@ -241,6 +252,7 @@ El backend ya está configurado para permitir:
 ## 🧪 Datos de Prueba Necesarios
 
 Para probar, necesitas al menos UN ejercicio en `exercise_activities` con:
+
 - Un enunciado HTML válido
 - Un template de código C# con `Main(string[] args) { }`
 - Una lista de palabras clave separadas por comas
@@ -270,14 +282,17 @@ VALUES (100, 1, '[3, 5]', '8', 'Suma de 3 + 5');
 ## 🐛 Solución de Problemas
 
 ### Error: "Palabra clave requerida no encontrada"
+
 - ✅ Verifica que el código contenga exactamente la palabra clave requerida
 - ✅ Sensible a mayúsculas/minúsculas
 
 ### Error: "Error al ejecutar el código"
+
 - ✅ Revisa la consola del backend para ver el error de JDoodle
 - ✅ Verifica que `code_template` tenga `Main(string[] args) { }`
 
 ### Output vacío
+
 - ✅ Asegúrate de que `input_data` es JSON válido
 - ✅ El programa debe usar `Console.WriteLine()` para output
 
