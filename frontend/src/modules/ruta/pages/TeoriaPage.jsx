@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import Card from "@ds/atoms/Card.jsx";
 import Button from "@ds/atoms/Button.jsx";
-import { getTheoryActivityApi } from "@services/api/learningPath.js";
+import { getTheoryActivityApi, getLearningPathApi, completeLearningActivityApi } from "@services/api/learningPath.js";
 import { runJdoodleExampleApi } from "@services/api/jdoodle.js";
 
 import AceEditor from "react-ace";
@@ -61,9 +61,27 @@ export default function TeoriaPage() {
     navigate("/ruta");
   };
 
-  const handleContinue = () => {
-    // Más adelante: actualizar progreso y racha, y mandar al siguiente paso
-    navigate("/ruta");
+  const handleContinue = async () => {
+    try {
+      // Marcar la actividad como completada (teoría)
+      await completeLearningActivityApi(id);
+
+      const data = await getLearningPathApi();
+      const ordered = [...data].sort((a, b) => a.step_order - b.step_order);
+      const currentIdx = ordered.findIndex((s) => String(s.id) === String(id));
+      if (currentIdx !== -1 && currentIdx + 1 < ordered.length) {
+        const next = ordered[currentIdx + 1];
+        const type = (next.activity_type || next.kind || "").toString().toLowerCase();
+        if (type.includes("theory")) navigate(`/teoria/${next.id}`);
+        else if (type.includes("exercise") || type.includes("practice")) navigate(`/practica/${next.id}`);
+        else navigate("/ruta");
+      } else {
+        navigate("/ruta");
+      }
+    } catch (e) {
+      console.error("Error fetching learning path:", e);
+      navigate("/ruta");
+    }
   };
 
   const handleRunExample = async () => {

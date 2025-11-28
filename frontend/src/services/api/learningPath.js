@@ -58,3 +58,8 @@ export function getTheoryActivityApi(courseId) {
 export function getLearningProgressApi() {
   return request(`/learning-path/progress`);
 }
+
+// Marca una actividad como completada para el usuario autenticado
+export function completeLearningActivityApi(courseId) {
+  return request(`/learning-path/complete/${courseId}`, { method: "POST" });
+}

@@ -7,6 +7,7 @@ import {
   getExerciseApi,
   validateExerciseApi,
 } from "../../../services/api/exercises";
+import { getLearningPathApi, completeLearningActivityApi } from "@services/api/learningPath.js";
 import "./PracticaPage.css";
 
 export default function PracticaPage() {
@@ -84,9 +85,26 @@ export default function PracticaPage() {
   // RQF20: Habilitar botón "Completar" solo si tests pasan
   const isCompleted = testResult?.success === true;
 
-  const handleCompletar = () => {
-    if (isCompleted) {
-      // Navegar a la siguiente lección o ruta
+  const handleCompletar = async () => {
+    if (!isCompleted) return;
+    try {
+      // Guardar progreso en backend antes de navegar
+      await completeLearningActivityApi(id);
+
+      const data = await getLearningPathApi();
+      const ordered = [...data].sort((a, b) => a.step_order - b.step_order);
+      const currentIdx = ordered.findIndex((s) => String(s.id) === String(id));
+      if (currentIdx !== -1 && currentIdx + 1 < ordered.length) {
+        const next = ordered[currentIdx + 1];
+        const type = (next.activity_type || next.kind || "").toString().toLowerCase();
+        if (type.includes("theory")) navigate(`/teoria/${next.id}`);
+        else if (type.includes("exercise") || type.includes("practice")) navigate(`/practica/${next.id}`);
+        else navigate("/ruta");
+      } else {
+        navigate("/ruta");
+      }
+    } catch (e) {
+      console.error("Error fetching learning path:", e);
       navigate("/ruta");
     }
   };

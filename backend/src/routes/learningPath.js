@@ -92,6 +92,42 @@ router.get("/theory/:courseId", requireAuth, async (req, res) => {
   }
 });
 
+// POST /api/learning-path/complete/:courseId
+// Marca una actividad como COMPLETED para el usuario autenticado
+router.post("/complete/:courseId", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const courseId = req.params.courseId;
+
+    // Verificar si ya hay un registro
+    const [rows] = await pool.query(
+      `SELECT id, status FROM user_course_progress WHERE user_id = ? AND course_id = ?`,
+      [userId, courseId]
+    );
+
+    if (rows.length > 0) {
+      // Actualizar a COMPLETED si no lo está
+      if (rows[0].status !== "COMPLETED") {
+        await pool.query(
+          `UPDATE user_course_progress SET status = 'COMPLETED' WHERE id = ?`,
+          [rows[0].id]
+        );
+      }
+    } else {
+      // Insertar registro (tabla sin columnas created_at/updated_at)
+      await pool.query(
+        `INSERT INTO user_course_progress (user_id, course_id, status) VALUES (?, ?, 'COMPLETED')`,
+        [userId, courseId]
+      );
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Error in POST /api/learning-path/complete/:courseId:", err);
+    return res.status(500).json({ message: "Error marking activity as completed" });
+  }
+});
+
 export default router;
 
 // GET /api/learning-path/progress
