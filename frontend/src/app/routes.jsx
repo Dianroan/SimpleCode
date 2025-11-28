@@ -15,11 +15,11 @@ import RutaPage from "@modules/ruta/pages/RutaPage.jsx";
 import TeoriaPage from "@modules/ruta/pages/TeoriaPage.jsx";
 import PracticaPage from "@modules/ruta/pages/PracticaPage.jsx";
 import LearningPathPage from "../modules/ruta/pages/LearningPathPage";
+import PerfilPage from "@modules/core/pages/PerfilPage.jsx";
 
 const Cursos = () => <div className="p-3">Cursos</div>;
 const Desafios = () => <div className="p-3">Desafíos</div>;
 const Debilidades = () => <div className="p-3">Debilidades</div>;
-const Perfil = () => <div className="p-3">Perfil</div>;
 
 export const routes = [
   // PÚBLICAS: si hay sesión -> /ruta
@@ -61,7 +61,7 @@ export const routes = [
       { path: "cursos", element: <Cursos /> },
       { path: "desafios", element: <Desafios /> },
       { path: "debilidades", element: <Debilidades /> },
-      { path: "perfil", element: <Perfil /> },
+      { path: "perfil", element: <PerfilPage /> },
       { path: "teoria/:id", element: <TeoriaPage /> },
       { path: "practica/:id", element: <PracticaPage /> },
     ],
