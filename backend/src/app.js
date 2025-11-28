@@ -4,6 +4,7 @@ import authRoutes from "./routes/auth.js";
 import healthRoutes from "./routes/health.js";
 import learningPathRoutes from "./routes/learningPath.js";
 import jdoodleRoutes from "./routes/jdoodle.routes.js";
+import exercisesRoutes from "./routes/exercises.js";
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/health", healthRoutes);
 app.use("/api/learning-path", learningPathRoutes);
 app.use("/api/jdoodle", jdoodleRoutes);
+app.use("/api/exercises", exercisesRoutes);
 
 export default app;

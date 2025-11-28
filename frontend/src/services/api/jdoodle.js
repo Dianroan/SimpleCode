@@ -2,7 +2,7 @@
 import { request } from "./http";
 
 export function runJdoodleExampleApi(script) {
-  return request("/jdoodle", {
+  return request("/jdoodle/run-example", {
     method: "POST",
     body: { script },
   });

@@ -17,8 +17,11 @@ class Program
 {
     static void Main(string[] args)
     {
+    int age = 30;
+        Console.Write("Tu edad es: ");
+        Console.WriteLine(age + 5);
         Console.Write("Tu nombre es: ");
-        Console.WriteLine("Diego");
+        Console.WriteLine("Diana");
         Console.WriteLine("Este es un ejemplo de salida usando Console.WriteLine.");
     }
 }`;

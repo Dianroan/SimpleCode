@@ -1,0 +1,277 @@
+.practica-page {
+  background: linear-gradient(135deg, #1f3a5f 0%, #2d5a8c 100%);
+  min-height: 100vh;
+  padding: 2rem;
+  color: #fff;
+}
+
+.practica-page.loading,
+.practica-page.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.practica-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Columna izquierda - Problema */
+.practica-left {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: #333;
+  overflow-y: auto;
+  max-height: 800px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.problem-section h2 {
+  color: #1f3a5f;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.problem-statement {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.problem-statement h3 {
+  color: #1f3a5f;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.problem-statement ul,
+.problem-statement ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.problem-statement li {
+  margin-bottom: 0.5rem;
+}
+
+.problem-statement code {
+  background: #f5f5f5;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  color: #d73a49;
+}
+
+.problem-statement pre {
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  border-left: 4px solid #2d5a8c;
+}
+
+.keywords-hint {
+  background: #e3f2fd;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border-left: 4px solid #2196f3;
+  margin-top: 1rem;
+}
+
+.keywords-hint code {
+  background: transparent;
+  color: #1976d2;
+  padding: 0;
+  font-weight: bold;
+}
+
+/* Columna derecha - Editor y controles */
+.practica-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.editor-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.editor-section h3 {
+  color: #1f3a5f;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Botones */
+.button-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #2196f3;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
+.btn-success {
+  background: #4caf50;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #388e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-secondary {
+  background: #757575;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #616161;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+}
+
+/* Output */
+.output-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.output-section h3 {
+  color: #1f3a5f;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.output-console {
+  width: 100%;
+  height: 150px;
+  padding: 0.75rem;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+/* Test Results */
+.test-result {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border-left: 4px solid;
+}
+
+.test-result.success {
+  border-left-color: #4caf50;
+}
+
+.test-result.success .test-message {
+  color: #2e7d32;
+}
+
+.test-result.failure {
+  border-left-color: #f44336;
+}
+
+.test-result.failure .test-message {
+  color: #c62828;
+}
+
+.test-message {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.test-count {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Error Message */
+.error-message {
+  background: rgba(244, 67, 54, 0.1);
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 4px;
+  border-left: 4px solid #f44336;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .practica-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .practica-left {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .practica-page {
+    padding: 1rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
