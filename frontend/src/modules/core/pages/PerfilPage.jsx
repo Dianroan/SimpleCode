@@ -34,11 +34,15 @@ export default function PerfilPage() {
           <Card className="p-4 h-100">
             <h5 className="mb-3">Información Personal</h5>
             <div className="mb-3">
-              <label className="form-label text-muted small">Nombre de usuario</label>
+              <label className="form-label text-muted small">
+                Nombre de usuario
+              </label>
               <p className="h6">{user?.username || "N/A"}</p>
             </div>
             <div>
-              <label className="form-label text-muted small">Correo Electrónico</label>
+              <label className="form-label text-muted small">
+                Correo Electrónico
+              </label>
               <p className="h6">{user?.email || "N/A"}</p>
             </div>
           </Card>
@@ -48,7 +52,9 @@ export default function PerfilPage() {
         <div className="col-md-6">
           <Card className="p-4 h-100">
             <h5 className="mb-3">Progreso en la Ruta</h5>
-            {progressLoading && <p className="text-muted">Cargando progreso...</p>}
+            {progressLoading && (
+              <p className="text-muted">Cargando progreso...</p>
+            )}
             {!progressLoading && progress && (
               <>
                 <div className="mb-3">
@@ -66,7 +72,8 @@ export default function PerfilPage() {
                   </div>
                 </div>
                 <p className="mb-0 text-muted">
-                  <strong>{progress.completed}</strong> de <strong>{progress.total}</strong> actividades completadas
+                  <strong>{progress.completed}</strong> de{" "}
+                  <strong>{progress.total}</strong> actividades completadas
                 </p>
               </>
             )}
