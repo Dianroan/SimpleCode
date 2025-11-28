@@ -7,7 +7,10 @@ import {
   getExerciseApi,
   validateExerciseApi,
 } from "../../../services/api/exercises";
-import { getLearningPathApi, completeLearningActivityApi } from "@services/api/learningPath.js";
+import {
+  getLearningPathApi,
+  completeLearningActivityApi,
+} from "@services/api/learningPath.js";
 import "./PracticaPage.css";
 
 export default function PracticaPage() {
@@ -96,9 +99,12 @@ export default function PracticaPage() {
       const currentIdx = ordered.findIndex((s) => String(s.id) === String(id));
       if (currentIdx !== -1 && currentIdx + 1 < ordered.length) {
         const next = ordered[currentIdx + 1];
-        const type = (next.activity_type || next.kind || "").toString().toLowerCase();
+        const type = (next.activity_type || next.kind || "")
+          .toString()
+          .toLowerCase();
         if (type.includes("theory")) navigate(`/teoria/${next.id}`);
-        else if (type.includes("exercise") || type.includes("practice")) navigate(`/practica/${next.id}`);
+        else if (type.includes("exercise") || type.includes("practice"))
+          navigate(`/practica/${next.id}`);
         else navigate("/ruta");
       } else {
         navigate("/ruta");
