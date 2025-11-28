@@ -53,3 +53,8 @@ export function getLearningPathApi() {
 export function getTheoryActivityApi(courseId) {
   return request(`/learning-path/theory/${courseId}`);
 }
+
+// Obtiene progreso general del usuario y la siguiente actividad
+export function getLearningProgressApi() {
+  return request(`/learning-path/progress`);
+}

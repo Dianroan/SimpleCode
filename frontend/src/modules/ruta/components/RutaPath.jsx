@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getLearningPathApi } from "@services/api/learningPath.js";
+import { getLearningPathApi, getLearningProgressApi } from "@services/api/learningPath.js";
 import StepDot from "./StepDot.jsx";
 import StepCard from "./StepCard.jsx";
 
@@ -12,6 +12,8 @@ export default function RutaPath() {
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState(null);
+  const [progressLoading, setProgressLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -34,6 +36,21 @@ export default function RutaPath() {
     })();
   }, []);
 
+  // Cargar progreso y siguiente actividad
+  useEffect(() => {
+    (async () => {
+      try {
+        setProgressLoading(true);
+        const p = await getLearningProgressApi();
+        setProgress(p);
+      } catch (e) {
+        console.error("Error loading progress:", e);
+      } finally {
+        setProgressLoading(false);
+      }
+    })();
+  }, []);
+
   const goTo = (step) => {
     if (!step) return;
     if (step.activity_type === "THEORY") {
@@ -46,10 +63,10 @@ export default function RutaPath() {
   return (
     <div className="container py-4">
       <h1 className="mb-3">Ruta de aprendizaje</h1>
-      <p className="text-muted mb-4">
-        Estos pasos vienen directamente de la base de datos (tabla{" "}
-        <code>courses</code>).
-      </p>
+      <p className="text-muted mb-4">Estos pasos vienen directamente de la base de datos (tabla <code>courses</code>).</p>
+
+      <div className="row">
+        <div className="col-lg-8">
 
       {error && (
         <div className="alert alert-danger" role="alert">
@@ -90,6 +107,51 @@ export default function RutaPath() {
           })}
         </div>
       )}
+        </div>
+
+        <div className="col-lg-4">
+          <div className="card p-3 mb-3">
+            <h5>Progreso del curso</h5>
+            {progressLoading && <p>Cargando progreso...</p>}
+            {!progressLoading && progress && (
+              <>
+                <div className="mb-2">
+                  <div className="progress" style={{ height: 22 }}>
+                    <div
+                      className="progress-bar"
+                      role="progressbar"
+                      style={{ width: `${progress.percentage}%` }}
+                      aria-valuenow={progress.percentage}
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      {progress.percentage}%
+                    </div>
+                  </div>
+                </div>
+                <p className="mb-2 text-muted">{progress.completed} de {progress.total} actividades completadas</p>
+
+                {progress.nextActivity ? (
+                  <div>
+                    <p className="mb-1"><strong>Siguiente actividad:</strong></p>
+                    <p className="mb-2">{progress.nextActivity.step_order}. {progress.nextActivity.title}</p>
+                    <div className="d-flex gap-2">
+                      <button className="btn btn-primary btn-sm" onClick={() => goTo(progress.nextActivity)}>
+                        Ir a la siguiente lección
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-success">¡Has completado todas las actividades!</p>
+                )}
+              </>
+            )}
+            {!progressLoading && !progress && (
+              <p>No se pudo cargar el progreso.</p>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
