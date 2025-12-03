@@ -73,12 +73,13 @@ export const validateExercise = async (req, res) => {
     const exerciseData = exercise[0];
     const requiredKeywords = exerciseData.required_keywords?.split(",").map(k => k.trim()) || [];
     let functionName = requiredKeywords.length > 0 ? requiredKeywords[0] : null;
+    let functionReturnType = null;
 
     // If required_keywords contains a type (e.g. 'long') or a control keyword
     // like 'if', or it's not a valid identifier, ignore it and extract the
     // actual function name from the code template.
     const primitiveTypes = ["int", "long", "double", "float", "string", "bool", "void"];
-    const controlKeywords = ["if", "for", "while", "switch", "return", "public", "private", "class"];
+    const controlKeywords = ["if", "for", "while", "foreach", "switch", "return", "break", "continue", "public", "private", "class"];
     const isValidIdentifier = (s) => /^[A-Za-z_]\w*$/.test(s || "");
 
     if (functionName) {
@@ -89,10 +90,16 @@ export const validateExercise = async (req, res) => {
     }
 
     if (!functionName && typeof code === "string") {
-      const fnMatch = code.match(/public\s+static\s+\w+\s+(\w+)\s*\(/i);
-      if (fnMatch && fnMatch[1]) {
-        functionName = fnMatch[1];
+      const fnMatch = code.match(/public\s+static\s+(\w+)\s+(\w+)\s*\(/i);
+      if (fnMatch && fnMatch[2]) {
+        functionReturnType = fnMatch[1];
+        functionName = fnMatch[2];
       }
+    } else if (functionName && typeof code === "string") {
+      // If a functionName was inferred from required keywords, try to detect its return type from the code
+      const re = new RegExp(`public\\s+static\\s+(\\w+)\\s+${functionName}\\s*\\(`, 'i');
+      const m = code.match(re);
+      if (m && m[1]) functionReturnType = m[1];
     }
 
     // Validar keywords (case-insensitive)
@@ -122,22 +129,52 @@ export const validateExercise = async (req, res) => {
     // Each test will produce a single Console.WriteLine(call) so outputs map 1:1 to tests
     const formatArg = (arg) => {
       if (arg === null) return "null";
+
+      // Arrays (1D and 2D) -> format as C# array literals
+      if (Array.isArray(arg)) {
+        // Empty array -> new int[] { }
+        if (arg.length === 0) return "new int[] { }";
+
+        // Detect 2D (array of arrays)
+        if (Array.isArray(arg[0])) {
+          // Build rows
+          const rows = arg.map(row => {
+            if (!Array.isArray(row)) return `{ ${formatArg(row)} }`;
+            const inner = row.map(v => {
+              // inner values should be primitives
+              if (typeof v === 'string') return formatArg(v);
+              if (typeof v === 'boolean') return v ? 'true' : 'false';
+              return String(v);
+            }).join(', ');
+            return `{ ${inner} }`;
+          }).join(', ');
+          return `new int[,] { ${rows} }`;
+        }
+
+        // 1D array -> new int[] { a, b, c }
+        const items = arg.map(v => {
+          if (v === null) return 'null';
+          if (typeof v === 'string') return formatArg(v);
+          if (typeof v === 'boolean') return v ? 'true' : 'false';
+          return String(v);
+        }).join(', ');
+        return `new int[] { ${items} }`;
+      }
+
       if (typeof arg === "string") {
         // Check if it's a numeric string (for long numbers)
-        // If it's a number-like string, pass it without quotes (as long literal)
         if (/^-?\d+$/.test(arg)) {
-          // For very large integers, append suffix L to make explicit long literal in C#
-          // Use suffix when length > 10 (heuristic) or absolute value > 2^31-1
           const absDigits = arg.replace(/^[-+]/, "");
           if (absDigits.length > 10) {
             return arg + "L";
           }
-          return arg; // Pass as numeric literal
+          return arg;
         }
-        // Otherwise, it's a real string - escape it with quotes
         return JSON.stringify(arg);
       }
+
       if (typeof arg === "boolean") return arg ? "true" : "false";
+
       return String(arg);
     };
 
@@ -149,7 +186,12 @@ export const validateExercise = async (req, res) => {
           if (Array.isArray(inputs)) {
             const argList = inputs.map(i => formatArg(i)).join(", ");
             if (functionName) {
-              generated = `    Console.WriteLine(${functionName}(${argList}));\n`;
+              // If the user's function returns void, call it directly; it should print its own output.
+              if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+                generated = `    ${functionName}(${argList});\n`;
+              } else {
+                generated = `    Console.WriteLine(${functionName}(${argList}));\n`;
+              }
             } else {
               // fallback: print each input on its own line
               inputs.forEach(i => {
@@ -159,23 +201,35 @@ export const validateExercise = async (req, res) => {
           } else {
             const arg = formatArg(inputs);
             if (functionName) {
-              generated = `    Console.WriteLine(${functionName}(${arg}));\n`;
+              if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+                generated = `    ${functionName}(${arg});\n`;
+              } else {
+                generated = `    Console.WriteLine(${functionName}(${arg}));\n`;
+              }
             } else {
               generated = `    Console.WriteLine(${arg});\n`;
             }
           }
         } catch (e) {
           // If input_data is not valid JSON, print it as a string
-          if (functionName) {
-            generated = `    Console.WriteLine(${functionName}(${JSON.stringify(test.input_data)}));\n`;
-          } else {
-            generated = `    Console.WriteLine(${JSON.stringify(test.input_data)});\n`;
-          }
+            if (functionName) {
+              if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+                generated = `    ${functionName}(${JSON.stringify(test.input_data)});\n`;
+              } else {
+                generated = `    Console.WriteLine(${functionName}(${JSON.stringify(test.input_data)}));\n`;
+              }
+            } else {
+              generated = `    Console.WriteLine(${JSON.stringify(test.input_data)});\n`;
+            }
         }
       } else {
         // No input_data: if function exists, call without args; else print empty line
         if (functionName) {
-          generated = `    Console.WriteLine(${functionName}());\n`;
+          if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+            generated = `    ${functionName}();\n`;
+          } else {
+            generated = `    Console.WriteLine(${functionName}());\n`;
+          }
         } else {
           generated = `    Console.WriteLine();\n`;
         }
@@ -209,10 +263,14 @@ export const validateExercise = async (req, res) => {
 
       jdoodleOutput = output;
 
-      // Comparar líneas de output con expected
+      // Comparar output con expected
+      // If all functions are void, the entire output is the combined result of all function calls
+      // and we need to split it appropriately across tests.
+      // If functions return values, each test gets one line from outputLines.
+      let lineIndex = 0;
+      
       for (let i = 0; i < tests.length; i++) {
         const expectedOutput = (tests[i].expected_output || "").trim();
-        const actualOutput = outputLines[i] || "";
         
         // Parse input_data for display
         let inputDisplay = "";
@@ -227,6 +285,27 @@ export const validateExercise = async (req, res) => {
           }
         } catch (e) {
           inputDisplay = tests[i].input_data || "";
+        }
+
+        let actualOutput = "";
+        
+        // If the function returns void, the expected output may contain multiple lines
+        // We need to collect lines from the output until we've assembled what's expected
+        if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+          const expectedLines = expectedOutput.split("\n").map(l => l.trim());
+          const actualLines = [];
+          
+          for (let j = 0; j < expectedLines.length; j++) {
+            if (lineIndex < outputLines.length) {
+              actualLines.push(outputLines[lineIndex]);
+              lineIndex++;
+            }
+          }
+          actualOutput = actualLines.join("\n");
+        } else {
+          // Non-void function: each test gets one line of output
+          actualOutput = outputLines[lineIndex] || "";
+          lineIndex++;
         }
 
         if (actualOutput === expectedOutput) {
