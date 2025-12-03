@@ -72,6 +72,7 @@ export const validateExercise = async (req, res) => {
 
     const exerciseData = exercise[0];
     const requiredKeywords = exerciseData.required_keywords?.split(",").map(k => k.trim()) || [];
+    const functionName = requiredKeywords.length > 0 ? requiredKeywords[0] : null;
 
     // Validar keywords
     for (const keyword of requiredKeywords) {
@@ -91,21 +92,59 @@ export const validateExercise = async (req, res) => {
     let fullTestCode = code;
     let mainInjection = "";
 
+    // Build injection that calls the user's function (if function name known)
+    // Each test will produce a single Console.WriteLine(call) so outputs map 1:1 to tests
+    const formatArg = (arg) => {
+      if (arg === null) return "null";
+      if (typeof arg === "string") {
+        // JSON.stringify gives a properly escaped JS string literal, which works for simple cases in C# too
+        return JSON.stringify(arg);
+      }
+      if (typeof arg === "boolean") return arg ? "true" : "false";
+      return String(arg);
+    };
+
     for (const test of tests) {
+      let generated = "";
       if (test.input_data) {
         try {
           const inputs = JSON.parse(test.input_data);
           if (Array.isArray(inputs)) {
-            inputs.forEach(input => {
-              mainInjection += `    Console.WriteLine(${JSON.stringify(input)});\n`;
-            });
+            const argList = inputs.map(i => formatArg(i)).join(", ");
+            if (functionName) {
+              generated = `    Console.WriteLine(${functionName}(${argList}));\n`;
+            } else {
+              // fallback: print each input on its own line
+              inputs.forEach(i => {
+                generated += `    Console.WriteLine(${formatArg(i)});\n`;
+              });
+            }
           } else {
-            mainInjection += `    Console.WriteLine(${JSON.stringify(inputs)});\n`;
+            const arg = formatArg(inputs);
+            if (functionName) {
+              generated = `    Console.WriteLine(${functionName}(${arg}));\n`;
+            } else {
+              generated = `    Console.WriteLine(${arg});\n`;
+            }
           }
         } catch (e) {
-          mainInjection += `    Console.WriteLine(${JSON.stringify(test.input_data)});\n`;
+          // If input_data is not valid JSON, print it as a string
+          if (functionName) {
+            generated = `    Console.WriteLine(${functionName}(${JSON.stringify(test.input_data)}));\n`;
+          } else {
+            generated = `    Console.WriteLine(${JSON.stringify(test.input_data)});\n`;
+          }
+        }
+      } else {
+        // No input_data: if function exists, call without args; else print empty line
+        if (functionName) {
+          generated = `    Console.WriteLine(${functionName}());\n`;
+        } else {
+          generated = `    Console.WriteLine();\n`;
         }
       }
+
+      mainInjection += generated;
     }
 
     // Inyectar en el Main
