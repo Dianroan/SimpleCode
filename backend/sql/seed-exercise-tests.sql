@@ -170,3 +170,19 @@ INSERT INTO `exercise_tests` (exercise_id, test_order, input_data, expected_outp
 (44, 3, '[[]]', '0', 'Arreglo vacio retorna 0'),
 (44, 4, '[[-1,-5,4]]', '-2', 'Suma con numeros negativos'),
 (44, 5, '[[100]]', '100', 'Arreglo con un solo elemento');
+
+-- Ejemplos de 5 tests para Ejercicio 47: Funcion Sumar (dos enteros)
+INSERT INTO `exercise_tests` (exercise_id, test_order, input_data, expected_output, description) VALUES
+(47, 1, '[3,5]', '8', 'Suma 3 + 5'),
+(47, 2, '[10,2]', '12', 'Suma 10 + 2'),
+(47, 3, '[-1,4]', '3', 'Suma -1 + 4'),
+(47, 4, '[0,0]', '0', 'Suma 0 + 0'),
+(47, 5, '[100,-50]', '50', 'Suma positiva y negativa');
+
+-- Ejemplos de 5 tests para Ejercicio 48: TieneEspacio (string)
+INSERT INTO `exercise_tests` (exercise_id, test_order, input_data, expected_output, description) VALUES
+(48, 1, '["Hola mundo"]', 'True', 'Texto con un espacio'),
+(48, 2, '["SinEspacios"]', 'False', 'Texto sin espacios'),
+(48, 3, '["  doble"]', 'True', 'Comienza con espacios'),
+(48, 4, '[""]', 'False', 'String vacio retorna False'),
+(48, 5, '["Espacio final "]', 'True', 'Espacio al final');
