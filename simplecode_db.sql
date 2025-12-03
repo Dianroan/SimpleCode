@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 03, 2025 at 10:44 AM
+-- Generation Time: Dec 03, 2025 at 11:03 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -169,6 +169,17 @@ CREATE TABLE `exercise_attempts` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `exercise_attempts`
+--
+
+INSERT INTO `exercise_attempts` (`id`, `user_id`, `exercise_id`, `is_successful`, `passed_tests`, `total_tests`, `jdoodle_output`, `created_at`) VALUES
+(4, 3, 9, 1, 0, 0, '', '2025-12-03 03:45:40'),
+(5, 3, 9, 1, 0, 0, '', '2025-12-03 03:51:04'),
+(6, 3, 9, 1, 5, 5, '8\n12\n0\n0\n300', '2025-12-03 03:59:51'),
+(7, 3, 9, 0, 1, 5, '6\n20\n-2\n0\n200', '2025-12-03 04:01:03'),
+(8, 3, 9, 1, 5, 5, '8\n12\n0\n0\n300', '2025-12-03 04:01:12');
+
 -- --------------------------------------------------------
 
 --
@@ -183,6 +194,32 @@ CREATE TABLE `exercise_tests` (
   `expected_output` text NOT NULL,
   `description` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exercise_tests`
+--
+
+INSERT INTO `exercise_tests` (`id`, `exercise_id`, `test_order`, `input_data`, `expected_output`, `description`) VALUES
+(1, 9, 1, '[3,5]', '8', 'Suma 3 + 5'),
+(2, 9, 2, '[10,2]', '12', 'Suma 10 + 2'),
+(3, 9, 3, '[-1,1]', '0', 'Suma -1 + 1'),
+(4, 9, 4, '[0,0]', '0', 'Suma 0 + 0'),
+(5, 9, 5, '[100,200]', '300', 'Suma 100 + 200'),
+(6, 10, 1, '[8,5]', '3', 'Resta 8 - 5'),
+(7, 10, 2, '[10,20]', '-10', 'Resta 10 - 20'),
+(8, 10, 3, '[100,1]', '99', 'Resta 100 - 1'),
+(9, 10, 4, '[0,5]', '-5', 'Resta 0 - 5'),
+(10, 10, 5, '[-3,-2]', '-1', 'Resta -3 - (-2)'),
+(11, 11, 1, '[3,5]', '15', 'Multiplica 3 * 5'),
+(12, 11, 2, '[10,2]', '20', 'Multiplica 10 * 2'),
+(13, 11, 3, '[7,-3]', '-21', 'Multiplica 7 * -3'),
+(14, 11, 4, '[0,100]', '0', 'Multiplica 0 * 100'),
+(15, 11, 5, '[-4,-5]', '20', 'Multiplica -4 * -5'),
+(16, 12, 1, '[10,2]', '5', 'Division 10 / 2'),
+(17, 12, 2, '[9,3]', '3', 'Division 9 / 3'),
+(18, 12, 3, '[7,2]', '3', 'Division entera 7 / 2 -> 3'),
+(19, 12, 4, '[5,0]', '0', 'Denominador cero -> retornar 0'),
+(20, 12, 5, '[-7,2]', '-3', 'Division con negativos');
 
 -- --------------------------------------------------------
 
@@ -442,13 +479,13 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `exercise_attempts`
 --
 ALTER TABLE `exercise_attempts`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `exercise_tests`
 --
 ALTER TABLE `exercise_tests`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `tags`

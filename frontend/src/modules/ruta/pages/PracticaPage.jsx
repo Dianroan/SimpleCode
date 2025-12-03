@@ -64,6 +64,7 @@ export default function PracticaPage() {
           message: "¡Correcto! Todos los tests pasaron.",
           passed: result.passed_tests,
           total: result.total_tests,
+          details: result.test_results || [],
         });
       } else {
         // RQF19: Mensaje de fallo con X/Y tests
@@ -72,6 +73,7 @@ export default function PracticaPage() {
           message: `${result.passed_tests}/${result.total_tests} tests pasados`,
           passed: result.passed_tests,
           total: result.total_tests,
+          details: result.test_results || [],
         });
       }
 
@@ -142,6 +144,39 @@ export default function PracticaPage() {
               <div className="keywords-hint">
                 <strong>Palabras clave requeridas:</strong>
                 <code>{exercise.required_keywords}</code>
+              </div>
+            )}
+
+            {/* Mostrar tests disponibles */}
+            {exercise.tests && exercise.tests.length > 0 && (
+              <div className="tests-preview">
+                <h3>📋 Casos de Prueba ({exercise.tests.length})</h3>
+                <div className="tests-list">
+                  {exercise.tests.map((test, idx) => (
+                    <div key={test.id || idx} className="test-case-preview">
+                      <div className="test-header">
+                        <span className="test-number">
+                          Test {test.test_order}
+                        </span>
+                        {test.description && (
+                          <span className="test-description">
+                            {test.description}
+                          </span>
+                        )}
+                      </div>
+                      <div className="test-io">
+                        <div className="test-input">
+                          <strong>Entrada:</strong>
+                          <code>{test.input_data || "sin parámetros"}</code>
+                        </div>
+                        <div className="test-expected">
+                          <strong>Salida esperada:</strong>
+                          <code>{test.expected_output}</code>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -220,6 +255,61 @@ export default function PracticaPage() {
               <p className="test-count">
                 {testResult.passed}/{testResult.total} tests pasados
               </p>
+
+              {/* Mostrar detalles de cada test */}
+              {testResult.details && testResult.details.length > 0 && (
+                <div className="test-details">
+                  <h4>Detalles de los tests:</h4>
+                  <div className="tests-result-list">
+                    {testResult.details.map((detail, idx) => (
+                      <div
+                        key={idx}
+                        className={`test-detail ${
+                          detail.passed ? "passed" : "failed"
+                        }`}
+                      >
+                        <div className="test-header-result">
+                          <span className="test-status">
+                            {detail.passed ? "✓ PASÓ" : "✗ FALLÓ"}
+                          </span>
+                          <span className="test-num">
+                            Test {detail.test_number}
+                          </span>
+                          {detail.description && (
+                            <span className="test-desc">
+                              {detail.description}
+                            </span>
+                          )}
+                        </div>
+                        <div className="test-io-result">
+                          <div className="row">
+                            <div className="input-col">
+                              <strong>Entrada:</strong>
+                              <code>{detail.input}</code>
+                            </div>
+                            <div className="expected-col">
+                              <strong>Esperado:</strong>
+                              <code>{detail.expected}</code>
+                            </div>
+                            <div className="actual-col">
+                              <strong>Obtenido:</strong>
+                              <code
+                                className={
+                                  detail.passed
+                                    ? "success-output"
+                                    : "error-output"
+                                }
+                              >
+                                {detail.actual || "(vacío)"}
+                              </code>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

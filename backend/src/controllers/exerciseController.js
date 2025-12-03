@@ -171,12 +171,41 @@ export const validateExercise = async (req, res) => {
       for (let i = 0; i < tests.length; i++) {
         const expectedOutput = (tests[i].expected_output || "").trim();
         const actualOutput = outputLines[i] || "";
+        
+        // Parse input_data for display
+        let inputDisplay = "";
+        try {
+          if (tests[i].input_data) {
+            const parsed = JSON.parse(tests[i].input_data);
+            if (Array.isArray(parsed)) {
+              inputDisplay = parsed.join(", ");
+            } else {
+              inputDisplay = String(parsed);
+            }
+          }
+        } catch (e) {
+          inputDisplay = tests[i].input_data || "";
+        }
 
         if (actualOutput === expectedOutput) {
           passedTests++;
-          testResults.push({ passed: true, output: actualOutput, expected: expectedOutput });
+          testResults.push({ 
+            test_number: i + 1,
+            input: inputDisplay,
+            expected: expectedOutput, 
+            actual: actualOutput,
+            passed: true,
+            description: tests[i].description
+          });
         } else {
-          testResults.push({ passed: false, output: actualOutput, expected: expectedOutput });
+          testResults.push({ 
+            test_number: i + 1,
+            input: inputDisplay,
+            expected: expectedOutput, 
+            actual: actualOutput,
+            passed: false,
+            description: tests[i].description
+          });
         }
       }
     } catch (error) {

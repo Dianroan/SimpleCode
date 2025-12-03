@@ -250,6 +250,220 @@
   border-left: 4px solid #f44336;
 }
 
+/* Tests Preview - Casos de prueba antes de ejecutar */
+.tests-preview {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e0e0e0;
+}
+
+.tests-preview h3 {
+  color: #1f3a5f;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.tests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.test-case-preview {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.test-case-preview:hover {
+  background: #f0f0f0;
+  border-color: #2196f3;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+}
+
+.test-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.test-number {
+  background: #2196f3;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.test-description {
+  color: #666;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.test-io {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.test-input,
+.test-expected {
+  flex: 1;
+  min-width: 150px;
+}
+
+.test-input strong,
+.test-expected strong {
+  display: block;
+  color: #333;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.test-input code,
+.test-expected code {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0.4rem;
+  border-radius: 3px;
+  display: block;
+  font-family: 'Courier New', monospace;
+  color: #d73a49;
+  word-break: break-word;
+}
+
+/* Test Details - Resultados después de ejecutar */
+.test-details {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+}
+
+.test-details h4 {
+  color: #1f3a5f;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.tests-result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.test-detail {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.75rem;
+  background: #f9f9f9;
+  transition: all 0.2s ease;
+}
+
+.test-detail.passed {
+  border-left: 4px solid #4caf50;
+  background: #f1f8f4;
+}
+
+.test-detail.failed {
+  border-left: 4px solid #f44336;
+  background: #fef5f5;
+}
+
+.test-header-result {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.test-status {
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 3px;
+}
+
+.test-detail.passed .test-status {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+
+.test-detail.failed .test-status {
+  background: #ffcdd2;
+  color: #c62828;
+}
+
+.test-num {
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.test-desc {
+  color: #999;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.test-io-result .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.input-col,
+.expected-col,
+.actual-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-col strong,
+.expected-col strong,
+.actual-col strong {
+  color: #333;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.input-col code,
+.expected-col code,
+.actual-col code {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0.4rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  color: #d73a49;
+  word-break: break-word;
+  min-height: 1.5em;
+  display: flex;
+  align-items: center;
+}
+
+.actual-col code.success-output {
+  color: #2e7d32;
+  border-color: #4caf50;
+  background: #f1f8f4;
+}
+
+.actual-col code.error-output {
+  color: #c62828;
+  border-color: #f44336;
+  background: #fef5f5;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .practica-container {
@@ -259,6 +473,10 @@
 
   .practica-left {
     max-height: 400px;
+  }
+
+  .test-io-result .row {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -273,5 +491,14 @@
 
   .btn {
     width: 100%;
+  }
+
+  .test-io {
+    flex-direction: column;
+  }
+
+  .test-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
