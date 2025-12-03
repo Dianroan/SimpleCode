@@ -72,15 +72,41 @@ export const validateExercise = async (req, res) => {
 
     const exerciseData = exercise[0];
     const requiredKeywords = exerciseData.required_keywords?.split(",").map(k => k.trim()) || [];
-    const functionName = requiredKeywords.length > 0 ? requiredKeywords[0] : null;
+    let functionName = requiredKeywords.length > 0 ? requiredKeywords[0] : null;
 
-    // Validar keywords
-    for (const keyword of requiredKeywords) {
-      if (!code.includes(keyword)) {
-        return res.status(400).json({ 
-          error: `Palabra clave requerida no encontrada: '${keyword}'` 
-        });
+    // If required_keywords contains a type (e.g. 'long') or a control keyword
+    // like 'if', or it's not a valid identifier, ignore it and extract the
+    // actual function name from the code template.
+    const primitiveTypes = ["int", "long", "double", "float", "string", "bool", "void"];
+    const controlKeywords = ["if", "for", "while", "switch", "return", "public", "private", "class"];
+    const isValidIdentifier = (s) => /^[A-Za-z_]\w*$/.test(s || "");
+
+    if (functionName) {
+      const fnLower = functionName.toLowerCase();
+      if (primitiveTypes.includes(fnLower) || controlKeywords.includes(fnLower) || !isValidIdentifier(functionName)) {
+        functionName = null;
       }
+    }
+
+    if (!functionName && typeof code === "string") {
+      const fnMatch = code.match(/public\s+static\s+\w+\s+(\w+)\s*\(/i);
+      if (fnMatch && fnMatch[1]) {
+        functionName = fnMatch[1];
+      }
+    }
+
+    // Validar keywords (case-insensitive)
+    const codeLower = (code || "").toLowerCase();
+    const missingKeywords = [];
+    for (const keyword of requiredKeywords) {
+      const k = (keyword || "").toLowerCase();
+      if (!k) continue;
+      if (!codeLower.includes(k)) missingKeywords.push(keyword);
+    }
+    if (missingKeywords.length > 0) {
+      return res.status(400).json({ 
+        error: `Palabra(s) clave(s) requeridas no encontrada(s): ${missingKeywords.join(", ")}` 
+      });
     }
 
     // Inyectar y ejecutar tests
@@ -97,7 +123,18 @@ export const validateExercise = async (req, res) => {
     const formatArg = (arg) => {
       if (arg === null) return "null";
       if (typeof arg === "string") {
-        // JSON.stringify gives a properly escaped JS string literal, which works for simple cases in C# too
+        // Check if it's a numeric string (for long numbers)
+        // If it's a number-like string, pass it without quotes (as long literal)
+        if (/^-?\d+$/.test(arg)) {
+          // For very large integers, append suffix L to make explicit long literal in C#
+          // Use suffix when length > 10 (heuristic) or absolute value > 2^31-1
+          const absDigits = arg.replace(/^[-+]/, "");
+          if (absDigits.length > 10) {
+            return arg + "L";
+          }
+          return arg; // Pass as numeric literal
+        }
+        // Otherwise, it's a real string - escape it with quotes
         return JSON.stringify(arg);
       }
       if (typeof arg === "boolean") return arg ? "true" : "false";
@@ -155,6 +192,11 @@ export const validateExercise = async (req, res) => {
 
     try {
       // Llamar JDoodle una sola vez con todos los tests
+      // DEBUG: print generated code for exercise 14 to help diagnose compilation issues
+      if (String(id) === "14") {
+        console.info("[DEBUG] Generated code for exercise 14:\n", fullTestCode);
+      }
+
       const response = await axios.post("https://api.jdoodle.com/v1/execute", {
         script: fullTestCode,
         language: "csharp",
