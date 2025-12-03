@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 28, 2025 at 09:17 AM
+-- Generation Time: Dec 03, 2025 at 10:44 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -296,7 +296,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `created_at`) VALUES
-(1, 'dara', 'dara@gmail.com', '$2b$10$CnBLmkgYy2QKfo56aeMHieOwzDSGYu0yaCjOr2G/2T0MFI0Rr.3FS', 'user', '2025-11-18 01:42:33');
+(3, 'dara', 'dara@gmail.com', '$2b$10$Kngcw4mdsN1TfTM8yNxUj.CSAQ1j./EzObfIdqr.TxSNdc.SXd6UC', 'user', '2025-12-03 09:37:33');
 
 -- --------------------------------------------------------
 
@@ -312,6 +312,13 @@ CREATE TABLE `user_course_progress` (
   `last_accessed_at` datetime DEFAULT NULL,
   `completed_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_course_progress`
+--
+
+INSERT INTO `user_course_progress` (`id`, `user_id`, `course_id`, `status`, `last_accessed_at`, `completed_at`) VALUES
+(14, 3, 1, 'COMPLETED', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -435,7 +442,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `exercise_attempts`
 --
 ALTER TABLE `exercise_attempts`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `exercise_tests`
@@ -459,13 +466,13 @@ ALTER TABLE `theory_examples`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `user_course_progress`
 --
 ALTER TABLE `user_course_progress`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `user_streaks`
