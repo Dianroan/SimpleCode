@@ -25,8 +25,12 @@ export async function request(path, options = {}) {
   const data = isJSON ? await res.json().catch(() => ({})) : null;
 
   if (!res.ok) {
-    const message = data?.message || `HTTP ${res.status}`;
-    throw new Error(message);
+    const message = data?.error || data?.message || `HTTP ${res.status}`;
+    const err = new Error(message);
+    // Attach response-like shape so callers can inspect server body
+    err.response = { data, status: res.status };
+    throw err;
   }
+
   return data;
 }
