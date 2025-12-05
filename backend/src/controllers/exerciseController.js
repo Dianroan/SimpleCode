@@ -343,10 +343,51 @@ export const validateExercise = async (req, res) => {
     // RQF22: Guardar intento en BD si es usuario autenticado
     if (userId) {
       try {
+        // comprobar si es el primer intento para la actividad
+        const [prev] = await pool.query(
+          "SELECT COUNT(*) as cnt FROM exercise_attempts WHERE user_id = ? AND exercise_id = ?",
+          [userId, id]
+        );
+        const attemptsBefore = prev?.[0]?.cnt || 0;
+        const firstAttempt = attemptsBefore === 0;
+
         await pool.query(
           "INSERT INTO exercise_attempts (user_id, exercise_id, is_successful, passed_tests, total_tests, jdoodle_output) VALUES (?, ?, ?, ?, ?, ?)",
           [userId, id, isSuccessful ? 1 : 0, passedTests, tests.length, jdoodleOutput.trim()]
         );
+
+        // Actualizar debilidades según el algoritmo
+        // obtener etiquetas asociadas al ejercicio
+        const [tags] = await pool.query(
+          `SELECT t.id FROM tags t JOIN exercise_tags et ON et.tag_id = t.id WHERE et.exercise_id = ?`,
+          [id]
+        );
+
+        if (tags && tags.length > 0) {
+          const conn = await pool.getConnection();
+          try {
+            await conn.beginTransaction();
+            for (const tag of tags) {
+              if (!isSuccessful) {
+                await conn.query(
+                  `INSERT INTO user_weaknesses (user_id, tag_id, value) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE value = value + 1`,
+                  [userId, tag.id]
+                );
+              } else if (isSuccessful && firstAttempt) {
+                await conn.query(
+                  `INSERT INTO user_weaknesses (user_id, tag_id, value) VALUES (?, ?, 0) ON DUPLICATE KEY UPDATE value = GREATEST(0, value - 1)`,
+                  [userId, tag.id]
+                );
+              }
+            }
+            await conn.commit();
+          } catch (e) {
+            await conn.rollback();
+            console.error("Error updating weaknesses after attempt:", e);
+          } finally {
+            conn.release();
+          }
+        }
       } catch (dbError) {
         console.error("Error saving attempt:", dbError);
       }
@@ -364,3 +405,6 @@ export const validateExercise = async (req, res) => {
     res.status(500).json({ error: "Error al validar el ejercicio" });
   }
 };
+
+// (duplicate snippet removed)
+// añadimos este bloque para actualizar user_weaknesses:
