@@ -9,7 +9,7 @@ import {
 } from "../../../services/api/exercises";
 import {
   getLearningPathApi,
-  completeLearningActivityApi,
+  completeActivityAndUpdateStreakApi,
 } from "@services/api/learningPath.js";
 import "./PracticaPage.css";
 
@@ -108,8 +108,8 @@ export default function PracticaPage() {
       setCompletingExercise(true);
       setError("");
 
-      // Guardar progreso en backend antes de navegar
-      await completeLearningActivityApi(id);
+      // Guardar progreso en backend Y actualizar racha antes de navegar
+      await completeActivityAndUpdateStreakApi(id);
 
       const data = await getLearningPathApi();
       const ordered = [...data].sort((a, b) => a.step_order - b.step_order);

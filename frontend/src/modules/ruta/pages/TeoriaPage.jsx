@@ -7,7 +7,7 @@ import Button from "@ds/atoms/Button.jsx";
 import {
   getTheoryActivityApi,
   getLearningPathApi,
-  completeLearningActivityApi,
+  completeActivityAndUpdateStreakApi,
 } from "@services/api/learningPath.js";
 import { runJdoodleExampleApi } from "@services/api/jdoodle.js";
 import CodeBlockRenderer from "../components/CodeBlockRenderer.jsx";
@@ -68,8 +68,8 @@ export default function TeoriaPage() {
 
   const handleContinue = async () => {
     try {
-      // Marcar la actividad como completada (teoría)
-      await completeLearningActivityApi(id);
+      // Marcar la actividad como completada (teoría) Y actualizar racha
+      await completeActivityAndUpdateStreakApi(id);
 
       const data = await getLearningPathApi();
       const ordered = [...data].sort((a, b) => a.step_order - b.step_order);

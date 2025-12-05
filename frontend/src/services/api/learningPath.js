@@ -43,6 +43,7 @@ export async function getTheoryActivity(courseId) {
 
 // src/services/api/learningPath.js
 import { request } from "./http";
+import { updateStreakApi } from "./streaks";
 
 // Obtiene toda la ruta de aprendizaje del usuario
 export function getLearningPathApi() {
@@ -62,4 +63,17 @@ export function getLearningProgressApi() {
 // Marca una actividad como completada para el usuario autenticado
 export function completeLearningActivityApi(courseId) {
   return request(`/learning-path/complete/${courseId}`, { method: "POST" });
+}
+
+// Marca actividad como completada Y actualiza la racha
+export async function completeActivityAndUpdateStreakApi(courseId) {
+  // Primero completar la actividad (crítico)
+  await completeLearningActivityApi(courseId);
+  
+  // Intentar actualizar racha (no crítico, no debe bloquear)
+  try {
+    await updateStreakApi();
+  } catch (error) {
+    console.warn("No se pudo actualizar la racha, pero la actividad se completó:", error);
+  }
 }

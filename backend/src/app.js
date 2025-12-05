@@ -6,6 +6,7 @@ import learningPathRoutes from "./routes/learningPath.js";
 import jdoodleRoutes from "./routes/jdoodle.routes.js";
 import exercisesRoutes from "./routes/exercises.js";
 import weaknessesRoutes from "./routes/weaknesses.js";
+import streaksRoutes from "./routes/streaks.js";
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.use("/api/learning-path", learningPathRoutes);
 app.use("/api/jdoodle", jdoodleRoutes);
 app.use("/api/exercises", exercisesRoutes);
 app.use("/api/weaknesses", weaknessesRoutes);
+app.use("/api/streaks", streaksRoutes);
 
 export default app;

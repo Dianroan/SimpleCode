@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@context/AuthContext.jsx";
+import StreakIndicator from "@modules/core/components/StreakIndicator.jsx";
 
 export default function SimpleNavbar() {
   const { user, status, logout } = useAuth();
@@ -28,7 +29,9 @@ export default function SimpleNavbar() {
           {status === "guest" ? (
             <>
               <Link
-                className={`btn btn-link ${location.pathname === "/login" ? "fw-semibold" : ""}`}
+                className={`btn btn-link ${
+                  location.pathname === "/login" ? "fw-semibold" : ""
+                }`}
                 to="/login"
               >
                 Iniciar sesión
@@ -42,10 +45,14 @@ export default function SimpleNavbar() {
           {/* AUTENTICADO */}
           {status === "authed" && user ? (
             <>
+              <StreakIndicator />
               <span className="text-muted small d-none d-md-inline">
                 Hola, <strong>{user.username}</strong>
               </span>
-              <button onClick={handleLogout} className="btn btn-outline-danger btn-sm">
+              <button
+                onClick={handleLogout}
+                className="btn btn-outline-danger btn-sm"
+              >
                 Cerrar sesión
               </button>
             </>
