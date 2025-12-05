@@ -10,6 +10,7 @@ import {
   completeLearningActivityApi,
 } from "@services/api/learningPath.js";
 import { runJdoodleExampleApi } from "@services/api/jdoodle.js";
+import CodeBlockRenderer from "../components/CodeBlockRenderer.jsx";
 
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-csharp";
@@ -136,12 +137,8 @@ export default function TeoriaPage() {
           <h1 className="h3 mb-3">{activity.title}</h1>
 
           <Card className="p-3">
-            {/* Renderizamos el HTML que viene de la BD */}
-            <div
-              className="theory-content"
-              style={{ marginBottom: 0 }}
-              dangerouslySetInnerHTML={{ __html: activity.content }}
-            />
+            {/* Renderizamos el HTML que viene de la BD con soporte para code blocks */}
+            <CodeBlockRenderer htmlContent={activity.content} />
           </Card>
 
           {/* 🔹 Ejemplo interactivo SOLO para la lección 4 */}
