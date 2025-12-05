@@ -1,5 +1,5 @@
 import express from "express";
-import { recordAttempt, communityReport, getTopWeaknesses } from "../controllers/weaknessController.js";
+import { recordAttempt, communityReport, getTopWeaknesses, getWeaknessesByCategory } from "../controllers/weaknessController.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -12,5 +12,8 @@ router.post("/community-report", requireAuth, communityReport);
 
 // Obtener top debilidades del usuario
 router.get("/top", requireAuth, getTopWeaknesses);
+
+// Obtener debilidades por categoría
+router.get("/by-category", requireAuth, getWeaknessesByCategory);
 
 export default router;

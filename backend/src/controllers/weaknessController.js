@@ -125,3 +125,30 @@ export const getTopWeaknesses = async (req, res) => {
     res.status(500).json({ error: "Error al obtener debilidades" });
   }
 };
+
+// GET /api/weaknesses/by-category
+export const getWeaknessesByCategory = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
+
+    // Obtener categorías (cursos) donde el usuario tiene debilidades
+    const [categories] = await pool.query(
+      `SELECT DISTINCT c.id, c.title,
+              COALESCE(SUM(uw.value), 0) as total_weakness
+       FROM courses c
+       LEFT JOIN exercise_tags et ON c.id = et.exercise_id
+       LEFT JOIN user_weaknesses uw ON uw.tag_id = et.tag_id AND uw.user_id = ?
+       WHERE COALESCE(uw.value, 0) > 0
+       GROUP BY c.id, c.title
+       ORDER BY total_weakness DESC
+       LIMIT 10`,
+      [userId]
+    );
+
+    res.json(categories);
+  } catch (error) {
+    console.error("getWeaknessesByCategory error:", error);
+    res.status(500).json({ error: "Error al obtener debilidades por categoría" });
+  }
+};
