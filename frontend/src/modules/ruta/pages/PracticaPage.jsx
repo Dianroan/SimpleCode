@@ -30,6 +30,10 @@ export default function PracticaPage() {
     const loadExercise = async () => {
       try {
         setLoading(true);
+
+        // Scroll al inicio de la página
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
         // Resetear todos los estados cuando se carga un nuevo ejercicio
         setOutput("");
         setTestResult(null);

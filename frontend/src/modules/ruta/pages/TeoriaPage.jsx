@@ -46,6 +46,10 @@ export default function TeoriaPage() {
 
   useEffect(() => {
     if (!id) return;
+
+    // Scroll al inicio de la página
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     (async () => {
       try {
         setLoading(true);
