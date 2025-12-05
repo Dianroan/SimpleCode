@@ -1,6 +1,6 @@
 // src/modules/core/pages/PerfilPage.jsx
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Card from "@ds/atoms/Card.jsx";
 import { useAuth } from "@context/AuthContext.jsx";
 import { getLearningProgressApi } from "@services/api/learningPath.js";
@@ -8,6 +8,7 @@ import WeaknessChartsHorizontal from "@modules/core/components/WeaknessChartsHor
 
 export default function PerfilPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [progress, setProgress] = useState(null);
   const [progressLoading, setProgressLoading] = useState(true);
 
@@ -25,6 +26,16 @@ export default function PerfilPage() {
       }
     })();
   }, []);
+
+  const goToNextActivity = () => {
+    if (!progress?.nextActivity) return;
+    const activity = progress.nextActivity;
+    if (activity.activity_type === "THEORY") {
+      navigate(`/teoria/${activity.id}`);
+    } else if (activity.activity_type === "EXERCISE") {
+      navigate(`/practica/${activity.id}`);
+    }
+  };
 
   return (
     <div className="container py-4">
@@ -73,10 +84,32 @@ export default function PerfilPage() {
                     </div>
                   </div>
                 </div>
-                <p className="mb-0 text-muted">
+                <p className="mb-3 text-muted">
                   <strong>{progress.completed}</strong> de{" "}
                   <strong>{progress.total}</strong> actividades completadas
                 </p>
+
+                {progress.nextActivity ? (
+                  <div>
+                    <p className="mb-2">
+                      <strong>Siguiente actividad:</strong>
+                    </p>
+                    <p className="mb-3 text-muted">
+                      {progress.nextActivity.step_order}.{" "}
+                      {progress.nextActivity.title}
+                    </p>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={goToNextActivity}
+                    >
+                      Continuar con la siguiente lección
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-success">
+                    ¡Has completado todas las actividades!
+                  </p>
+                )}
               </>
             )}
             {!progressLoading && !progress && (

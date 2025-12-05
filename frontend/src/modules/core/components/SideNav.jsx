@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 export default function SideNav() {
   const items = [
     { to: "/ruta", label: "RUTA" },
-    { to: "/cursos", label: "CURSOS" },
     { to: "/desafios", label: "DESAFIOS" },
     { to: "/debilidades", label: "DEBILIDADES" },
     { to: "/perfil", label: "PERFIL" },

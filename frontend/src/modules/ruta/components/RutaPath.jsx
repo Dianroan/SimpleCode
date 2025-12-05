@@ -67,11 +67,6 @@ export default function RutaPath() {
   return (
     <div className="container py-4">
       <h1 className="mb-3">Ruta de aprendizaje</h1>
-      <p className="text-muted mb-4">
-        Estos pasos vienen directamente de la base de datos (tabla{" "}
-        <code>courses</code>).
-      </p>
-
       <div className="row">
         <div className="col-lg-8">
           {error && (
