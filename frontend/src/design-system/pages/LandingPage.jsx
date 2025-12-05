@@ -36,11 +36,11 @@ export default function LandingPage() {
             <div className="col-12 col-lg-6">
               {/* Vista previa de la plataforma */}
               <div className="rounded-3 shadow-sm overflow-hidden">
-                <img 
-                  src="/VistaPrevia.jpeg" 
-                  alt="Vista previa de SimpleCode" 
+                <img
+                  src="/VistaPrevia.jpeg"
+                  alt="Vista previa de SimpleCode"
                   className="w-100 h-auto"
-                  style={{ display: 'block' }}
+                  style={{ display: "block" }}
                 />
               </div>
             </div>
