@@ -1,5 +1,5 @@
 // src/modules/ruta/components/RutaPath.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import {
@@ -12,6 +12,7 @@ import WeaknessCharts from "@modules/core/components/WeaknessCharts.jsx";
 
 export default function RutaPath() {
   const navigate = useNavigate();
+  const scrollContainerRef = useRef(null);
 
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,9 @@ export default function RutaPath() {
         setLoading(false);
       }
     })();
+
+    // Scroll al inicio de la página cuando carga el componente
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
   // Cargar progreso y siguiente actividad
@@ -55,8 +59,59 @@ export default function RutaPath() {
     })();
   }, []);
 
-  const goTo = (step) => {
+  // Scroll automático al paso siguiente cuando se carga el progreso
+  useEffect(() => {
+    if (
+      !loading &&
+      !progressLoading &&
+      progress?.nextActivity &&
+      steps.length > 0 &&
+      scrollContainerRef.current
+    ) {
+      // Encontrar el índice del siguiente paso
+      const nextIndex = steps.findIndex(
+        (s) => s.id === progress.nextActivity.id
+      );
+      if (nextIndex !== -1) {
+        // Esperar un momento para que el DOM se renderice completamente
+        setTimeout(() => {
+          const nextElement = scrollContainerRef.current?.querySelector(
+            `[data-step-index="${nextIndex}"]`
+          );
+          if (nextElement) {
+            // Scroll dentro del contenedor, no de toda la página
+            const container = scrollContainerRef.current;
+            const elementTop = nextElement.offsetTop;
+            container.scrollTo({ top: elementTop - 20, behavior: "smooth" });
+          }
+        }, 100);
+      }
+    }
+  }, [loading, progressLoading, progress, steps]);
+
+  // Determinar si un paso está disponible
+  const isStepAvailable = (step, index) => {
+    // Si está completado, siempre disponible
+    if (step.status === "COMPLETED") return true;
+
+    // Si es el primer paso, siempre disponible
+    if (index === 0) return true;
+
+    // Si el paso anterior está completado, este está disponible
+    if (index > 0 && steps[index - 1].status === "COMPLETED") return true;
+
+    return false;
+  };
+
+  const goTo = (step, index) => {
     if (!step) return;
+
+    const stepIndex =
+      typeof index === "number"
+        ? index
+        : steps.findIndex((s) => s.id === step.id);
+    if (!isStepAvailable(step, stepIndex)) return;
+
     if (step.activity_type === "THEORY") {
       navigate(`/teoria/${step.id}`);
     } else if (step.activity_type === "EXERCISE") {
@@ -82,27 +137,83 @@ export default function RutaPath() {
           )}
 
           {!loading && !error && steps.length > 0 && (
-            <div className="d-flex flex-column gap-3 mt-3">
+            <div
+              ref={scrollContainerRef}
+              className="d-flex flex-column align-items-center gap-2 mt-4 position-relative"
+              style={{
+                maxHeight: "calc(100vh - 200px)",
+                overflowY: "auto",
+                overflowX: "hidden",
+                paddingRight: "10px",
+                scrollBehavior: "smooth",
+              }}
+            >
               {steps.map((step, index) => {
                 const kind =
                   step.activity_type === "THEORY" ? "theory" : "practice";
+                const isAvailable = isStepAvailable(step, index);
+                const isCompleted = step.status === "COMPLETED";
+                const isNext = progress?.nextActivity?.id === step.id;
+
+                // Alternar posición (izquierda/centro/derecha) estilo Duolingo
+                const position =
+                  index % 3 === 0
+                    ? "center"
+                    : index % 3 === 1
+                    ? "start"
+                    : "end";
 
                 return (
                   <div
                     key={step.id}
-                    className="d-flex align-items-center gap-3"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => goTo(step)}
+                    data-step-index={index}
+                    className="d-flex flex-column align-items-center position-relative"
+                    style={{
+                      width: "100%",
+                      maxWidth: "600px",
+                      alignSelf: position,
+                    }}
                   >
-                    <StepDot kind={kind} />
-                    <div className="flex-grow-1">
-                      <StepCard kind={kind} title={step.title} />
+                    {/* Línea conectora */}
+                    {index > 0 && (
+                      <div
+                        style={{
+                          width: "4px",
+                          height: "40px",
+                          backgroundColor:
+                            isCompleted || isAvailable ? "#28a745" : "#dee2e6",
+                          marginBottom: "8px",
+                          borderRadius: "2px",
+                        }}
+                      />
+                    )}
+
+                    <div
+                      className="d-flex align-items-center gap-3 w-100"
+                      style={{
+                        cursor: isAvailable ? "pointer" : "not-allowed",
+                        opacity: isAvailable ? 1 : 0.5,
+                        filter: isAvailable ? "none" : "grayscale(100%)",
+                      }}
+                      onClick={() => goTo(step, index)}
+                    >
+                      <StepDot
+                        kind={kind}
+                        isCompleted={isCompleted}
+                        isAvailable={isAvailable}
+                        isNext={isNext}
+                      />
+                      <div className="flex-grow-1">
+                        <StepCard
+                          kind={kind}
+                          title={step.title}
+                          isCompleted={isCompleted}
+                          isAvailable={isAvailable}
+                          isNext={isNext}
+                          stepOrder={step.step_order}
+                        />
+                      </div>
                     </div>
-                    <small className="text-muted">
-                      Paso {step.step_order}
-                      {step.status === "COMPLETED" && " · Completado"}
-                      {step.status === "IN_PROGRESS" && " · En progreso"}
-                    </small>
                   </div>
                 );
               })}
@@ -147,7 +258,14 @@ export default function RutaPath() {
                     <div className="d-flex gap-2">
                       <button
                         className="btn btn-primary btn-sm"
-                        onClick={() => goTo(progress.nextActivity)}
+                        onClick={() =>
+                          goTo(
+                            progress.nextActivity,
+                            steps.findIndex(
+                              (s) => s.id === progress.nextActivity.id
+                            )
+                          )
+                        }
                       >
                         Ir a la siguiente lección
                       </button>
