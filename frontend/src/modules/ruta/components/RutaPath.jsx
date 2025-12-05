@@ -1,6 +1,6 @@
 // src/modules/ruta/components/RutaPath.jsx
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import {
   getLearningPathApi,
@@ -8,6 +8,7 @@ import {
 } from "@services/api/learningPath.js";
 import StepDot from "./StepDot.jsx";
 import StepCard from "./StepCard.jsx";
+import WeaknessCharts from "@modules/core/components/WeaknessCharts.jsx";
 
 export default function RutaPath() {
   const navigate = useNavigate();
@@ -167,6 +168,19 @@ export default function RutaPath() {
             {!progressLoading && !progress && (
               <p>No se pudo cargar el progreso.</p>
             )}
+          </div>
+
+          {/* Sección de debilidades */}
+          <div className="card p-3">
+            <h5 className="mb-3">
+              <Link
+                to="/debilidades"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Debilidades
+              </Link>
+            </h5>
+            <WeaknessCharts />
           </div>
         </div>
       </div>

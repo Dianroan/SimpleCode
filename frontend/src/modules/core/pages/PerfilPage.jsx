@@ -1,8 +1,10 @@
 // src/modules/core/pages/PerfilPage.jsx
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Card from "@ds/atoms/Card.jsx";
 import { useAuth } from "@context/AuthContext.jsx";
 import { getLearningProgressApi } from "@services/api/learningPath.js";
+import WeaknessChartsHorizontal from "@modules/core/components/WeaknessChartsHorizontal.jsx";
 
 export default function PerfilPage() {
   const { user } = useAuth();
@@ -80,6 +82,23 @@ export default function PerfilPage() {
             {!progressLoading && !progress && (
               <p className="text-muted">No se pudo cargar el progreso.</p>
             )}
+          </Card>
+        </div>
+      </div>
+
+      {/* Sección de debilidades */}
+      <div className="row">
+        <div className="col-12">
+          <Card className="p-4">
+            <h5 className="mb-3">
+              <Link
+                to="/debilidades"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Debilidades
+              </Link>
+            </h5>
+            <WeaknessChartsHorizontal />
           </Card>
         </div>
       </div>
