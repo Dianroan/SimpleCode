@@ -23,16 +23,23 @@ export default function PracticaPage() {
   const [output, setOutput] = useState("");
   const [testResult, setTestResult] = useState(null);
   const [error, setError] = useState("");
+  const [completingExercise, setCompletingExercise] = useState(false);
 
   // RQF13: Cargar ejercicio con su descripción
   useEffect(() => {
     const loadExercise = async () => {
       try {
         setLoading(true);
+        // Resetear todos los estados cuando se carga un nuevo ejercicio
+        setOutput("");
+        setTestResult(null);
+        setError("");
+        setCompletingExercise(false);
+        setTesting(false);
+
         const data = await getExerciseApi(id);
         setExercise(data);
         setCode(data.code_template || "");
-        setError("");
       } catch (err) {
         console.error("Error loading exercise:", err);
         setError("Error al cargar el ejercicio");
@@ -91,8 +98,16 @@ export default function PracticaPage() {
   const isCompleted = testResult?.success === true;
 
   const handleCompletar = async () => {
-    if (!isCompleted) return;
+    // Doble verificación: solo permitir si tests pasaron
+    if (!isCompleted || !testResult?.success) {
+      setError("Debes pasar todos los tests antes de completar el ejercicio");
+      return;
+    }
+
     try {
+      setCompletingExercise(true);
+      setError("");
+
       // Guardar progreso en backend antes de navegar
       await completeLearningActivityApi(id);
 
@@ -112,8 +127,14 @@ export default function PracticaPage() {
         navigate("/ruta");
       }
     } catch (e) {
-      console.error("Error fetching learning path:", e);
-      navigate("/ruta");
+      console.error("Error completing exercise:", e);
+      const errorMsg =
+        e.response?.data?.message ||
+        e.message ||
+        "Error al completar el ejercicio";
+      setError(errorMsg);
+    } finally {
+      setCompletingExercise(false);
     }
   };
 
@@ -215,20 +236,15 @@ export default function PracticaPage() {
               {testing ? "Probando..." : "¡Probar!"}
             </button>
 
-            {/* RQF20: Botón "Completar" - condicional */}
-            {isCompleted ? (
-              <button className="btn btn-success" onClick={handleCompletar}>
-                Completar
-              </button>
-            ) : (
-              <button
-                className="btn btn-secondary"
-                onClick={handleCompletar}
-                disabled={true}
-              >
-                Completar
-              </button>
-            )}
+            {/* RQF20: Botón "Completar" - solo habilitado si tests pasaron */}
+            <button
+              className="btn btn-success"
+              onClick={handleCompletar}
+              disabled={!isCompleted || completingExercise}
+              title={!isCompleted ? "Debes pasar todos los tests primero" : ""}
+            >
+              {completingExercise ? "Completando..." : "Completar"}
+            </button>
 
             {/* Botón "Salir" */}
             <button className="btn btn-outline" onClick={handleSalir}>

@@ -94,10 +94,39 @@ router.get("/theory/:courseId", requireAuth, async (req, res) => {
 
 // POST /api/learning-path/complete/:courseId
 // Marca una actividad como COMPLETED para el usuario autenticado
+// Para ejercicios: verifica que el usuario haya pasado todos los tests
 router.post("/complete/:courseId", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
     const courseId = req.params.courseId;
+
+    // Verificar si la actividad es un ejercicio y validar que haya pasado los tests
+    const [courseRows] = await pool.query(
+      `SELECT activity_type FROM courses WHERE id = ?`,
+      [courseId]
+    );
+
+    if (courseRows.length === 0) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    const activityType = courseRows[0].activity_type?.toLowerCase() || "";
+    
+    // Si es un ejercicio (exercise o practice), verificar que haya pasado todos los tests
+    if (activityType.includes("exercise") || activityType.includes("practice")) {
+      // Verificar si el usuario tiene al menos un intento exitoso en este ejercicio
+      const [attempts] = await pool.query(
+        `SELECT id FROM exercise_attempts WHERE user_id = ? AND exercise_id = ? AND is_successful = 1 LIMIT 1`,
+        [userId, courseId]
+      );
+
+      if (attempts.length === 0) {
+        return res.status(403).json({ 
+          message: "Cannot complete exercise without passing all tests",
+          error: "TESTS_NOT_PASSED"
+        });
+      }
+    }
 
     // Verificar si ya hay un registro
     const [rows] = await pool.query(
