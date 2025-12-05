@@ -34,12 +34,14 @@ export default function LandingPage() {
             </div>
 
             <div className="col-12 col-lg-6">
-              {/* Visual placeholder: reemplázalo por una imagen/mockup */}
-              <div className="ratio ratio-16x9 rounded-3 shadow-sm bg-white d-flex align-items-center justify-content-center">
-                <div className="text-center p-4">
-                  <div className="fw-semibold mb-2">Vista previa</div>
-                  <div className="text-muted">En proceso.</div>
-                </div>
+              {/* Vista previa de la plataforma */}
+              <div className="rounded-3 shadow-sm overflow-hidden">
+                <img 
+                  src="/VistaPrevia.jpeg" 
+                  alt="Vista previa de SimpleCode" 
+                  className="w-100 h-auto"
+                  style={{ display: 'block' }}
+                />
               </div>
             </div>
           </div>
