@@ -32,6 +32,8 @@ export const getCurrentStreak = async (req, res) => {
 
     // Verificar si se rompió la racha
     let currentStreak = streak.current_streak_days;
+    let streakStartDate = null;
+    
     if (lastActivity) {
       const lastDate = new Date(lastActivity);
       const todayDate = new Date(today);
@@ -45,12 +47,18 @@ export const getCurrentStreak = async (req, res) => {
           `UPDATE user_streaks SET current_streak_days = 0 WHERE user_id = ?`,
           [userId]
         );
+      } else if (currentStreak > 0) {
+        // Calcular fecha de inicio de la racha
+        streakStartDate = new Date(lastDate);
+        streakStartDate.setDate(streakStartDate.getDate() - (currentStreak - 1));
+        streakStartDate = streakStartDate.toISOString().split('T')[0];
       }
     }
 
     res.json({
       current_streak_days: currentStreak,
       last_activity_date: lastActivity,
+      streak_start_date: streakStartDate,
       is_active_today: isActiveToday
     });
   } catch (error) {
