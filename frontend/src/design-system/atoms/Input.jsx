@@ -1,3 +1,11 @@
+/**
+ * Componente Input - Campo de entrada con validación visual
+ *
+ * Cambia de estilo automáticamente cuando hay errores de validación
+ *
+ * @param {boolean} isInvalid - Si el campo tiene error (muestra borde rojo)
+ */
+
 export default function Input({
   id,
   type = "text",

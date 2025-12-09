@@ -1,4 +1,17 @@
-// src/modules/core/pages/PerfilPage.jsx
+/**
+ * Página PerfilPage - Perfil del usuario
+ *
+ * Muestra:
+ * - Avatar con inicial del usuario
+ * - Nombre de usuario y email
+ * - Estadísticas de progreso (actividades completadas, total, porcentaje)
+ * - Racha actual con indicador visual
+ * - Botón "Continuar aprendiendo" (va a la siguiente actividad)
+ * - Gráficas de debilidades horizontales
+ *
+ * Carga en paralelo: progreso de ruta y racha actual
+ */
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Card from "@ds/atoms/Card.jsx";

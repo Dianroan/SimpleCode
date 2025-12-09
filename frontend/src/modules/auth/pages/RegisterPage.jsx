@@ -1,3 +1,15 @@
+/**
+ * Página de registro de nuevos usuarios
+ *
+ * Flujo:
+ * 1. Usuario completa formulario (username, email, password, confirm)
+ * 2. Llama a registerApi para crear cuenta
+ * 3. Automáticamente inicia sesión con loginApi
+ * 4. Guarda token y redirige a /dashboard
+ *
+ * Maneja errores de validación del backend (Zod) mostrando detalles específicos
+ */
+
 import RegisterForm from "@modules/auth/organisms/RegisterForm.jsx";
 import Button from "@ds/atoms/Button.jsx";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,14 +20,13 @@ export default function RegisterPage() {
   const nav = useNavigate();
   const [serverError, setServerError] = useState("");
   const [serverOk, setServerOk] = useState("");
-  const [serverDetails, setServerDetails] = useState(null); // 👈
+  const [serverDetails, setServerDetails] = useState(null);
 
   const handleRegister = async ({ username, email, password, confirm }) => {
     setServerError("");
     setServerOk("");
     setServerDetails(null);
 
-    // 👇 confirma lo que estás enviando (abre la consola del navegador)
     console.log("[REGISTER payload]", { username, email, password, confirm });
 
     try {
@@ -27,7 +38,7 @@ export default function RegisterPage() {
     } catch (e) {
       console.error("[REGISTER error]", e);
       setServerError(e.message || "Error al crear la cuenta.");
-      if (e.details) setServerDetails(e.details); // 👈 mostrar detalle zod
+      if (e.details) setServerDetails(e.details);
     }
   };
 

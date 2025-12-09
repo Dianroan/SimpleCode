@@ -1,12 +1,34 @@
+/**
+ * Controller de Ejercicios
+ * 
+ * Gestiona los ejercicios de programación en C#:
+ * - Obtención de ejercicios con sus casos de prueba
+ * - Validación de código del usuario
+ * - Ejecución de tests usando JDoodle API
+ * - Generación de código de ejemplo para mostrar
+ * - Registro de intentos y estadísticas
+ */
+
 import { pool } from "../db/pool.js";
 import axios from "axios";
 
-// GET /api/exercises/:id - Obtener ejercicio con sus tests
+/**
+ * GET /api/exercises/:id
+ * Obtiene un ejercicio específico con todos sus tests
+ * 
+ * Retorna:
+ * - Información del ejercicio (título, enunciado, template de código)
+ * - Lista de casos de prueba
+ * - Código de ejemplo que muestra cómo se ejecutarán los tests
+ * 
+ * @param {Request} req - Parámetro :id del ejercicio
+ * @param {Response} res - Datos del ejercicio y sus tests
+ */
 export const getExercise = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Obtener ejercicio
+    // Obtener información del ejercicio
     const [exercise] = await pool.query(
       "SELECT id, title, statement, code_template, required_keywords, total_tests FROM exercise_activities WHERE id = ?",
       [id]
@@ -16,13 +38,13 @@ export const getExercise = async (req, res) => {
       return res.status(404).json({ error: "Ejercicio no encontrado" });
     }
 
-    // Obtener tests
+    // Obtener casos de prueba del ejercicio, ordenados por número de test
     const [tests] = await pool.query(
       "SELECT id, test_order, input_data, expected_output, description FROM exercise_tests WHERE exercise_id = ? ORDER BY test_order",
       [id]
     );
 
-    // Generar código de ejemplo de pruebas para mostrar al usuario
+    // Generar código de ejemplo mostrando cómo se ejecutarán las pruebas
     const exampleTestsCode = generateExampleTestsCode(
       exercise[0].code_template,
       exercise[0].required_keywords,
@@ -51,17 +73,35 @@ export const getExercise = async (req, res) => {
   }
 };
 
-// Función auxiliar para generar código de ejemplo de las pruebas
+/**
+ * Genera código de ejemplo que muestra cómo se ejecutarán los tests
+ * 
+ * Esta función crea un método Main() en C# que llama a la función del usuario
+ * con los datos de entrada de cada test. Esto ayuda al usuario a entender
+ * cómo se probará su código.
+ * 
+ * Proceso:
+ * 1. Extrae el nombre de la función del código template o de required_keywords
+ * 2. Detecta el tipo de retorno de la función
+ * 3. Formatea los datos de entrada (arrays, strings, números, etc.)
+ * 4. Genera llamadas a la función con Console.WriteLine para cada test
+ * 
+ * @param {string} codeTemplate - Template de código del ejercicio
+ * @param {string} requiredKeywords - Palabras clave requeridas (puede incluir nombre de función)
+ * @param {Array} tests - Array de casos de prueba
+ * @returns {string} Código C# del método Main con las llamadas de prueba
+ */
 function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
   const keywords = requiredKeywords?.split(",").map(k => k.trim()) || [];
   let functionName = keywords.length > 0 ? keywords[0] : null;
   let functionReturnType = null;
 
-  // Validar si el nombre de función es válido
+  // Validar si el nombre de función es válido (no es un tipo primitivo o keyword)
   const primitiveTypes = ["int", "long", "double", "float", "string", "bool", "void"];
   const controlKeywords = ["if", "for", "while", "foreach", "switch", "return", "break", "continue", "public", "private", "class"];
   const isValidIdentifier = (s) => /^[A-Za-z_]\w*$/.test(s || "");
 
+  // Si el primer keyword no es un identificador válido, descartarlo
   if (functionName) {
     const fnLower = functionName.toLowerCase();
     if (primitiveTypes.includes(fnLower) || controlKeywords.includes(fnLower) || !isValidIdentifier(functionName)) {
@@ -69,7 +109,7 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
     }
   }
 
-  // Extraer nombre de función del template si no se encontró
+  // Extraer nombre de función del template si no se encontró en keywords
   if (!functionName && typeof codeTemplate === "string") {
     const fnMatch = codeTemplate.match(/public\s+static\s+(\w+)\s+(\w+)\s*\(/i);
     if (fnMatch && fnMatch[2]) {
@@ -77,18 +117,24 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
       functionName = fnMatch[2];
     }
   } else if (functionName && typeof codeTemplate === "string") {
+    // Si ya tenemos el nombre, extraer el tipo de retorno
     const re = new RegExp(`public\\s+static\\s+(\\w+)\\s+${functionName}\\s*\\(`, 'i');
     const m = codeTemplate.match(re);
     if (m && m[1]) functionReturnType = m[1];
   }
 
-  // Función para formatear argumentos
+  /**
+   * Formatea un argumento para código C#
+   * Convierte valores JavaScript a sintaxis C# apropiada
+   */
   const formatArg = (arg) => {
     if (arg === null) return "null";
 
+    // Manejar arrays (1D y 2D)
     if (Array.isArray(arg)) {
       if (arg.length === 0) return "new int[] { }";
 
+      // Detectar array 2D (array de arrays)
       if (Array.isArray(arg[0])) {
         const rows = arg.map(row => {
           if (!Array.isArray(row)) return `{ ${formatArg(row)} }`;
@@ -102,6 +148,7 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
         return `new int[,] { ${rows} }`;
       }
 
+      // Array 1D
       const items = arg.map(v => {
         if (v === null) return 'null';
         if (typeof v === 'string') return formatArg(v);
@@ -111,9 +158,11 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
       return `new int[] { ${items} }`;
     }
 
+    // Strings y números grandes (long)
     if (typeof arg === "string") {
       if (/^-?\d+$/.test(arg)) {
         const absDigits = arg.replace(/^[-+]/, "");
+        // Si tiene más de 10 dígitos, tratarlo como long
         if (absDigits.length > 10) {
           return arg + "L";
         }
@@ -122,12 +171,13 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
       return JSON.stringify(arg);
     }
 
+    // Booleans
     if (typeof arg === "boolean") return arg ? "true" : "false";
 
     return String(arg);
   };
 
-  // Generar las llamadas de prueba
+  // Generar el código del método Main con las llamadas de prueba
   let mainCode = "public static void Main(string[] args)\n{\n";
   
   for (const test of tests) {
@@ -136,17 +186,22 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
       try {
         const inputs = JSON.parse(test.input_data);
         if (Array.isArray(inputs)) {
+          // Múltiples argumentos
           const argList = inputs.map(i => formatArg(i)).join(", ");
           if (functionName) {
             if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+              // Función void: solo llamar, no imprimir retorno
               testCall = `    ${functionName}(${argList});`;
             } else {
+              // Función con retorno: imprimir el resultado
               testCall = `    Console.WriteLine(${functionName}(${argList}));`;
             }
           } else {
+            // Fallback: imprimir cada input
             testCall = inputs.map(i => `    Console.WriteLine(${formatArg(i)});`).join('\n');
           }
         } else {
+          // Un solo argumento
           const arg = formatArg(inputs);
           if (functionName) {
             if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
@@ -159,6 +214,7 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
           }
         }
       } catch (e) {
+        // Si input_data no es JSON válido, usarlo como string
         if (functionName) {
           if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
             testCall = `    ${functionName}(${JSON.stringify(test.input_data)});`;
@@ -170,6 +226,7 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
         }
       }
     } else {
+      // Sin datos de entrada: llamar función sin argumentos
       if (functionName) {
         if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
           testCall = `    ${functionName}();`;
@@ -189,7 +246,22 @@ function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
   return mainCode;
 }
 
-// POST /api/exercises/:id/validate - Validar código del usuario
+/**
+ * POST /api/exercises/:id/validate
+ * Valida el código enviado por el usuario contra los casos de prueba
+ * 
+ * Este es el endpoint más complejo del sistema. Realiza:
+ * 1. Extracción del nombre de función del código del usuario
+ * 2. Validación de palabras clave requeridas
+ * 3. Inyección de tests en el método Main()
+ * 4. Ejecución del código en JDoodle API
+ * 5. Comparación de outputs con resultados esperados
+ * 6. Registro del intento en base de datos
+ * 7. Actualización de contador de fallos si no pasa todos los tests
+ * 
+ * @param {Request} req - Body: { code: string }, Params: { id: exerciseId }
+ * @param {Response} res - Resultado de la validación con tests pasados/fallados
+ */
 export const validateExercise = async (req, res) => {
   try {
     const { id } = req.params;
@@ -200,7 +272,7 @@ export const validateExercise = async (req, res) => {
       return res.status(400).json({ error: "Código requerido" });
     }
 
-    // Obtener ejercicio
+    // Obtener información del ejercicio desde BD
     const [exercise] = await pool.query(
       "SELECT id, required_keywords, total_tests FROM exercise_activities WHERE id = ?",
       [id]
@@ -210,7 +282,7 @@ export const validateExercise = async (req, res) => {
       return res.status(404).json({ error: "Ejercicio no encontrado" });
     }
 
-    // Obtener tests
+    // Obtener todos los casos de prueba del ejercicio
     const [tests] = await pool.query(
       "SELECT expected_output, input_data FROM exercise_tests WHERE exercise_id = ? ORDER BY test_order",
       [id]
@@ -221,9 +293,9 @@ export const validateExercise = async (req, res) => {
     let functionName = requiredKeywords.length > 0 ? requiredKeywords[0] : null;
     let functionReturnType = null;
 
-    // If required_keywords contains a type (e.g. 'long') or a control keyword
-    // like 'if', or it's not a valid identifier, ignore it and extract the
-    // actual function name from the code template.
+    // Validar que el nombre de función sea válido
+    // Si required_keywords contiene un tipo primitivo (ej: 'long') o palabra reservada (ej: 'if'),
+    // ignorarlo y extraer el nombre real de la función del código del usuario
     const primitiveTypes = ["int", "long", "double", "float", "string", "bool", "void"];
     const controlKeywords = ["if", "for", "while", "foreach", "switch", "return", "break", "continue", "public", "private", "class"];
     const isValidIdentifier = (s) => /^[A-Za-z_]\w*$/.test(s || "");
@@ -235,6 +307,7 @@ export const validateExercise = async (req, res) => {
       }
     }
 
+    // Extraer nombre de función del código del usuario si no se encontró en keywords
     if (!functionName && typeof code === "string") {
       const fnMatch = code.match(/public\s+static\s+(\w+)\s+(\w+)\s*\(/i);
       if (fnMatch && fnMatch[2]) {
@@ -242,13 +315,13 @@ export const validateExercise = async (req, res) => {
         functionName = fnMatch[2];
       }
     } else if (functionName && typeof code === "string") {
-      // If a functionName was inferred from required keywords, try to detect its return type from the code
+      // Si tenemos nombre de función, detectar su tipo de retorno del código
       const re = new RegExp(`public\\s+static\\s+(\\w+)\\s+${functionName}\\s*\\(`, 'i');
       const m = code.match(re);
       if (m && m[1]) functionReturnType = m[1];
     }
 
-    // Validar keywords (case-insensitive)
+    // Validar que todas las palabras clave requeridas estén en el código (case-insensitive)
     const codeLower = (code || "").toLowerCase();
     const missingKeywords = [];
     for (const keyword of requiredKeywords) {
@@ -262,32 +335,30 @@ export const validateExercise = async (req, res) => {
       });
     }
 
-    // Inyectar y ejecutar tests
+    // Variables para recolectar resultados de la ejecución
     let passedTests = 0;
     let jdoodleOutput = "";
     const testResults = [];
 
-    // Ejecutar todos los tests pero recolectar output
     let fullTestCode = code;
     let mainInjection = "";
 
-    // Build injection that calls the user's function (if function name known)
-    // Each test will produce a single Console.WriteLine(call) so outputs map 1:1 to tests
+    /**
+     * Función interna para formatear argumentos para código C#
+     * (Igual que en generateExampleTestsCode, necesaria para inyectar tests)
+     */
     const formatArg = (arg) => {
       if (arg === null) return "null";
 
-      // Arrays (1D and 2D) -> format as C# array literals
+      // Manejar arrays 1D y 2D
       if (Array.isArray(arg)) {
-        // Empty array -> new int[] { }
         if (arg.length === 0) return "new int[] { }";
 
-        // Detect 2D (array of arrays)
+        // Detectar array 2D (array de arrays)
         if (Array.isArray(arg[0])) {
-          // Build rows
           const rows = arg.map(row => {
             if (!Array.isArray(row)) return `{ ${formatArg(row)} }`;
             const inner = row.map(v => {
-              // inner values should be primitives
               if (typeof v === 'string') return formatArg(v);
               if (typeof v === 'boolean') return v ? 'true' : 'false';
               return String(v);
@@ -297,7 +368,7 @@ export const validateExercise = async (req, res) => {
           return `new int[,] { ${rows} }`;
         }
 
-        // 1D array -> new int[] { a, b, c }
+        // Array 1D
         const items = arg.map(v => {
           if (v === null) return 'null';
           if (typeof v === 'string') return formatArg(v);
@@ -307,12 +378,12 @@ export const validateExercise = async (req, res) => {
         return `new int[] { ${items} }`;
       }
 
+      // Strings y números largos
       if (typeof arg === "string") {
-        // Check if it's a numeric string (for long numbers)
         if (/^-?\d+$/.test(arg)) {
           const absDigits = arg.replace(/^[-+]/, "");
           if (absDigits.length > 10) {
-            return arg + "L";
+            return arg + "L"; // Números grandes como long
           }
           return arg;
         }
@@ -324,6 +395,7 @@ export const validateExercise = async (req, res) => {
       return String(arg);
     };
 
+    // Generar llamadas de prueba para inyectar en el Main() del usuario
     for (const test of tests) {
       let generated = "";
       if (test.input_data) {
@@ -332,14 +404,15 @@ export const validateExercise = async (req, res) => {
           if (Array.isArray(inputs)) {
             const argList = inputs.map(i => formatArg(i)).join(", ");
             if (functionName) {
-              // If the user's function returns void, call it directly; it should print its own output.
+              // Si la función es void, solo llamarla (ella imprime)
               if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
                 generated = `    ${functionName}(${argList});\n`;
               } else {
+                // Si retorna valor, imprimirlo
                 generated = `    Console.WriteLine(${functionName}(${argList}));\n`;
               }
             } else {
-              // fallback: print each input on its own line
+              // Fallback: imprimir cada input en su propia línea
               inputs.forEach(i => {
                 generated += `    Console.WriteLine(${formatArg(i)});\n`;
               });
@@ -357,19 +430,19 @@ export const validateExercise = async (req, res) => {
             }
           }
         } catch (e) {
-          // If input_data is not valid JSON, print it as a string
-            if (functionName) {
-              if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
-                generated = `    ${functionName}(${JSON.stringify(test.input_data)});\n`;
-              } else {
-                generated = `    Console.WriteLine(${functionName}(${JSON.stringify(test.input_data)}));\n`;
-              }
+          // Si input_data no es JSON válido, usarlo como string
+          if (functionName) {
+            if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+              generated = `    ${functionName}(${JSON.stringify(test.input_data)});\n`;
             } else {
-              generated = `    Console.WriteLine(${JSON.stringify(test.input_data)});\n`;
+              generated = `    Console.WriteLine(${functionName}(${JSON.stringify(test.input_data)}));\n`;
             }
+          } else {
+            generated = `    Console.WriteLine(${JSON.stringify(test.input_data)});\n`;
+          }
         }
       } else {
-        // No input_data: if function exists, call without args; else print empty line
+        // Sin datos de entrada: llamar función sin argumentos
         if (functionName) {
           if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
             generated = `    ${functionName}();\n`;
@@ -384,15 +457,17 @@ export const validateExercise = async (req, res) => {
       mainInjection += generated;
     }
 
-    // Inyectar en el Main
+    // Inyectar las llamadas de prueba en el método Main() del código del usuario
     const mainPattern = /public\s+static\s+void\s+Main\s*\(\s*string\[\]\s+args\s*\)\s*\{/i;
     fullTestCode = fullTestCode.replace(mainPattern, (match) => {
       return match + "\n" + mainInjection;
     });
 
     try {
-      // Llamar JDoodle una sola vez con todos los tests
-      // DEBUG: print generated code for exercise 14 to help diagnose compilation issues
+      // Ejecutar el código completo en JDoodle API
+      // JDoodle es un servicio externo que compila y ejecuta código en varios lenguajes
+      
+      // DEBUG: Imprimir código generado para ejercicio específico (ayuda en troubleshooting)
       if (String(id) === "14") {
         console.info("[DEBUG] Generated code for exercise 14:\n", fullTestCode);
       }
@@ -409,16 +484,20 @@ export const validateExercise = async (req, res) => {
 
       jdoodleOutput = output;
 
-      // Comparar output con expected
-      // If all functions are void, the entire output is the combined result of all function calls
-      // and we need to split it appropriately across tests.
-      // If functions return values, each test gets one line from outputLines.
+      /**
+       * Comparación de outputs con resultados esperados
+       * 
+       * Lógica:
+       * - Si la función es void: cada test puede generar múltiples líneas de output
+       * - Si la función retorna valor: cada test genera exactamente 1 línea
+       * - Se comparan los outputs línea por línea con los esperados
+       */
       let lineIndex = 0;
       
       for (let i = 0; i < tests.length; i++) {
         const expectedOutput = (tests[i].expected_output || "").trim();
         
-        // Parse input_data for display
+        // Parsear input_data para mostrar en resultados
         let inputDisplay = "";
         try {
           if (tests[i].input_data) {
@@ -435,12 +514,12 @@ export const validateExercise = async (req, res) => {
 
         let actualOutput = "";
         
-        // If the function returns void, the expected output may contain multiple lines
-        // We need to collect lines from the output until we've assembled what's expected
+        // Si la función es void, puede generar múltiples líneas de output
         if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
           const expectedLines = expectedOutput.split("\n").map(l => l.trim());
           const actualLines = [];
           
+          // Recolectar tantas líneas como se esperan
           for (let j = 0; j < expectedLines.length; j++) {
             if (lineIndex < outputLines.length) {
               actualLines.push(outputLines[lineIndex]);
@@ -449,11 +528,12 @@ export const validateExercise = async (req, res) => {
           }
           actualOutput = actualLines.join("\n");
         } else {
-          // Non-void function: each test gets one line of output
+          // Función no-void: cada test = 1 línea de output
           actualOutput = outputLines[lineIndex] || "";
           lineIndex++;
         }
 
+        // Comparar output actual vs esperado
         if (actualOutput === expectedOutput) {
           passedTests++;
           testResults.push({ 
@@ -486,16 +566,24 @@ export const validateExercise = async (req, res) => {
 
     const isSuccessful = passedTests === tests.length;
 
-    // RQF22: Guardar intento en BD si es usuario autenticado
+    /**
+     * Guardar intento en base de datos
+     * 
+     * Registra:
+     * - Si el usuario está autenticado, guardar el intento
+     * - Si falló algún test, incrementar contador de fallos del ejercicio
+     * - Esto permite análisis de debilidades y progreso
+     */
     if (userId) {
       try {
+        // Insertar registro del intento con resultados
         await pool.query(
           "INSERT INTO exercise_attempts (user_id, exercise_id, is_successful, passed_tests, total_tests, jdoodle_output) VALUES (?, ?, ?, ?, ?, ?)",
           [userId, id, isSuccessful ? 1 : 0, passedTests, tests.length, jdoodleOutput.trim()]
         );
 
-        // Nueva lógica: incrementar contador de fallos por ejercicio
-        // Solo se cuenta como fallo cuando NO se aprueban todas las pruebas
+        // Si no pasó todos los tests, incrementar contador de fallos
+        // Esto se usa en el análisis de debilidades
         if (!isSuccessful) {
           await pool.query(
             `INSERT INTO exercise_failure_count (user_id, exercise_id, failure_count)
@@ -509,6 +597,7 @@ export const validateExercise = async (req, res) => {
       }
     }
 
+    // Retornar resultados de la validación al frontend
     res.json({
       is_successful: isSuccessful,
       passed_tests: passedTests,
@@ -521,6 +610,3 @@ export const validateExercise = async (req, res) => {
     res.status(500).json({ error: "Error al validar el ejercicio" });
   }
 };
-
-// (duplicate snippet removed)
-// añadimos este bloque para actualizar user_weaknesses:

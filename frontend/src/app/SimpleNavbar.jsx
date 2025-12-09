@@ -1,3 +1,12 @@
+/**
+ * Componente SimpleNavbar - Barra de navegación principal
+ *
+ * Se adapta dinámicamente según el estado de autenticación:
+ * - idle/loading: Muestra spinner de carga
+ * - guest: Muestra botones "Iniciar sesión" y "Crear cuenta"
+ * - authed: Muestra StreakIndicator, nombre de usuario y botón "Cerrar sesión"
+ */
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@context/AuthContext.jsx";
 import StreakIndicator from "@modules/core/components/StreakIndicator.jsx";
@@ -9,7 +18,7 @@ export default function SimpleNavbar() {
 
   const handleLogout = () => {
     logout();
-    navigate("/"); // o /login
+    navigate("/");
   };
 
   return (

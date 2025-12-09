@@ -1,3 +1,14 @@
+/**
+ * Componente StreakIndicator - Indicador de racha de aprendizaje
+ *
+ * Muestra la racha actual del usuario:
+ * - Icono de fuego 🔥 a color si la racha está activa hoy
+ * - Icono en escala de grises si no está activa
+ * - Número de días consecutivos
+ *
+ * Se recarga automáticamente al cambiar de ruta (por si el usuario completó una actividad)
+ */
+
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getCurrentStreakApi } from "@services/api/streaks";

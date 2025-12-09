@@ -1,3 +1,12 @@
+/**
+ * Componente Button - Botón reutilizable con variantes y efectos
+ *
+ * Soporta múltiples variantes de color y opción de degradado
+ *
+ * @param {string} variant - Variante de color: primary, success, warning, danger
+ * @param {boolean} gradient - Si se aplica degradado de color
+ */
+
 export default function Button({
   children,
   variant = "primary",
@@ -5,7 +14,6 @@ export default function Button({
   gradient = false,
   ...props
 }) {
-  // Estilos base para todos los botones
   const baseStyles = {
     fontWeight: "600",
     borderRadius: "0.75rem",
@@ -16,7 +24,6 @@ export default function Button({
     overflow: "hidden",
   };
 
-  // Estilos específicos por variante
   const variantStyles = {
     primary: gradient
       ? {

@@ -1,3 +1,16 @@
+/**
+ * Página LandingPage - Página de inicio pública
+ *
+ * Página principal para visitantes no autenticados con:
+ * - Hero section: Título, descripción y botones de CTA
+ * - Sección de características principales
+ * - Sección "Cómo funciona" con pasos visuales
+ * - Sección de beneficios
+ * - Call to action final
+ *
+ * Elementos decorativos animados y gradientes vibrantes en toda la página
+ */
+
 import { Link } from "react-router-dom";
 import Button from "@ds/atoms/Button.jsx";
 

@@ -1,4 +1,21 @@
-// src/modules/ruta/components/RutaPath.jsx
+/**
+ * Componente RutaPath - Visualización de la ruta de aprendizaje
+ *
+ * Muestra:
+ * - Secuencia de pasos (teoría y ejercicios) con StepDot y StepCard
+ * - Control de acceso: solo se pueden hacer pasos si el anterior está completo
+ * - Scroll automático al siguiente paso disponible
+ * - Gráficas de debilidades en el lateral
+ *
+ * Los pasos se ordenan por step_order y se marcan como:
+ * - COMPLETED: Paso completado (verde)
+ * - NOT_STARTED: Paso no iniciado (gris)
+ * - Disponible: Paso anterior completado (puede acceder)
+ * - Bloqueado: Paso anterior no completado (no puede acceder)
+ *
+ * Usuarios admin pueden acceder a todos los pasos
+ */
+
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 

@@ -1,4 +1,18 @@
-// src/context/AuthContext.jsx
+/**
+ * Contexto de Autenticación Global
+ *
+ * Maneja el estado de autenticación del usuario en toda la aplicación:
+ * - Verifica si hay token al cargar la app
+ * - Obtiene los datos del usuario desde el backend
+ * - Provee funciones para login y logout
+ *
+ * Estados posibles:
+ * - "idle": Estado inicial
+ * - "loading": Verificando token o cargando datos
+ * - "authed": Usuario autenticado
+ * - "guest": Sin autenticación
+ */
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { meApi } from "@services/api/auth.js";
 
@@ -6,9 +20,9 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [status, setStatus] = useState("idle"); // idle | loading | authed | guest
+  const [status, setStatus] = useState("idle");
 
-  // pide /me al montar si hay token
+  // Al montar, verificar si hay token guardado
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -19,6 +33,10 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Obtiene los datos del usuario desde el backend usando el token guardado
+   * Si el token es inválido, limpia la sesión
+   */
   const fetchMe = async () => {
     setStatus("loading");
     try {
@@ -33,6 +51,11 @@ export function AuthProvider({ children }) {
     }
   };
 
+  /**
+   * Inicia sesión guardando el token y datos del usuario
+   * @param {string} token - JWT del usuario
+   * @param {Object} me - Datos del usuario (opcional)
+   */
   const login = async (token, me) => {
     if (token) {
       localStorage.setItem("token", token);
@@ -41,11 +64,13 @@ export function AuthProvider({ children }) {
       setUser(me);
       setStatus("authed");
     } else {
-      // si no me lo pasaron, lo traigo
       await fetchMe();
     }
   };
 
+  /**
+   * Cierra sesión limpiando el token y datos del usuario
+   */
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -59,6 +84,10 @@ export function AuthProvider({ children }) {
   );
 }
 
+/**
+ * Hook para acceder al contexto de autenticación
+ * @returns {{ user, status, login, logout }}
+ */
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {

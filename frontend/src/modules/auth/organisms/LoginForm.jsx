@@ -1,3 +1,10 @@
+/**
+ * Componente LoginForm - Formulario de inicio de sesión
+ *
+ * Usa el hook useLoginForm para manejar estado, validación y envío
+ * Muestra campos de username y password con validación en tiempo real
+ */
+
 import Card from "@ds/atoms/Card.jsx";
 import TextField from "@ds/molecules/TextField.jsx";
 import Button from "@ds/atoms/Button.jsx";

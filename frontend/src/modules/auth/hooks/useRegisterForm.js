@@ -1,3 +1,16 @@
+/**
+ * Hook para manejar el formulario de registro
+ * 
+ * Gestiona:
+ * - Estado del formulario (username, email, password, confirm)
+ * - Validación completa de todos los campos
+ * - Verificación de coincidencia de contraseñas
+ * - Envío de datos al backend
+ * 
+ * @param {Function} onSubmit - Callback al enviar el formulario válido
+ * @returns {Object} { form, errors, submitting, handleChange, handleSubmit }
+ */
+
 import { useState, useCallback } from "react";
 import {
   s,
@@ -31,6 +44,13 @@ export default function useRegisterForm({ onSubmit } = {}) {
     [setField]
   );
 
+  /**
+   * Valida todos los campos del formulario
+   * - username: Requerido, formato válido
+   * - email: Requerido, formato email válido
+   * - password: Requerido, mínimo 6 caracteres
+   * - confirm: Requerido, debe coincidir con password
+   */
   const validate = useCallback(() => {
     const er = {};
     const username = s(form.username);
@@ -60,7 +80,6 @@ export default function useRegisterForm({ onSubmit } = {}) {
       if (!validate()) return;
       try {
         setSubmitting(true);
-        // 👇 incluir confirm en el payload
         const payload = {
           username: s(form.username),
           email: s(form.email),

@@ -1,7 +1,18 @@
-// src/modules/auth/pages/LoginPage.jsx
+/**
+ * Página de inicio de sesión
+ *
+ * Flujo:
+ * 1. Usuario envía credenciales (username, password)
+ * 2. Llama a loginApi para obtener token JWT
+ * 3. Guarda token en localStorage
+ * 4. Llama a meApi para obtener datos del usuario
+ * 5. Actualiza el contexto de autenticación
+ * 6. Redirige a /dashboard
+ */
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginApi, meApi } from "@services/api/auth.js"; // 👈 AQUÍ estaba faltando
+import { loginApi, meApi } from "@services/api/auth.js";
 import { useAuth } from "@context/AuthContext.jsx";
 import LoginForm from "@modules/auth/organisms/LoginForm.jsx";
 import Button from "@ds/atoms/Button.jsx";
@@ -11,16 +22,13 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
-  // src/modules/auth/pages/LoginPage.jsx
   const handleLogin = async ({ username, password }) => {
     setError("");
     try {
       const { token } = await loginApi({ username, password });
-
       localStorage.setItem("token", token);
 
       const { user } = await meApi();
-
       await login(token, user);
 
       navigate("/dashboard", { replace: true });

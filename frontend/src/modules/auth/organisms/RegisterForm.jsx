@@ -1,3 +1,10 @@
+/**
+ * Componente RegisterForm - Formulario de registro
+ *
+ * Usa el hook useRegisterForm para manejar estado, validación y envío
+ * Incluye campos: username, email, password, confirm con validación completa
+ */
+
 import Card from "@ds/atoms/Card.jsx";
 import TextField from "@ds/molecules/TextField.jsx";
 import Button from "@ds/atoms/Button.jsx";

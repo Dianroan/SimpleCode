@@ -1,3 +1,20 @@
+/**
+ * Página PracticaPage - Ejercicios de programación
+ *
+ * Permite al usuario:
+ * 1. Cargar el ejercicio con su descripción y template de código
+ * 2. Escribir código C# en AceEditor
+ * 3. Probar el código con "¡Probar!" (envía a JDoodle para compilar/ejecutar)
+ * 4. Ver resultados de tests unitarios (X/Y tests pasados)
+ * 5. Al pasar todos los tests, se habilita "Continuar" que marca como completado
+ *
+ * El sistema:
+ * - Resetea estado al cambiar de ejercicio
+ * - Registra fallos en puntos débiles automáticamente
+ * - Actualiza racha al completar ejercicio
+ * - Muestra output de consola y detalles de cada test
+ */
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AceEditor from "react-ace";

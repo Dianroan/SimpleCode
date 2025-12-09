@@ -1,12 +1,35 @@
+/**
+ * Controller de Rachas (Streaks)
+ * 
+ * Gestiona las rachas de estudio del usuario - días consecutivos de actividad.
+ * Una racha se mantiene si el usuario completa al menos una actividad cada día.
+ * Se rompe si pasa más de 1 día sin actividad.
+ */
+
 import { pool } from "../db/pool.js";
 
-// GET /api/streaks/current
+/**
+ * GET /api/streaks/current
+ * Obtiene la racha actual del usuario autenticado
+ * 
+ * Calcula:
+ * - Días consecutivos de actividad actual
+ * - Última fecha de actividad
+ * - Fecha de inicio de la racha
+ * - Si la racha está activa hoy
+ * - Si se rompió la racha (más de 1 día sin actividad)
+ * 
+ * @param {Request} req - Petición con req.user.id del middleware de auth
+ * @param {Response} res - Respuesta JSON con información de la racha
+ */
 export const getCurrentStreak = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
+    if (!userId) {
+      return res.status(401).json({ error: "Autenticación requerida" });
+    }
 
-    // Obtener racha actual
+    // Obtener registro de racha del usuario
     const [rows] = await pool.query(
       `SELECT current_streak_days, last_activity_date 
        FROM user_streaks 
@@ -14,8 +37,8 @@ export const getCurrentStreak = async (req, res) => {
       [userId]
     );
 
+    // Si no tiene racha registrada, retornar racha en 0
     if (rows.length === 0) {
-      // No tiene racha, retornar 0
       return res.json({
         current_streak_days: 0,
         last_activity_date: null,
@@ -24,13 +47,15 @@ export const getCurrentStreak = async (req, res) => {
     }
 
     const streak = rows[0];
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const lastActivity = streak.last_activity_date ? new Date(streak.last_activity_date).toISOString().split('T')[0] : null;
+    const today = new Date().toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+    const lastActivity = streak.last_activity_date 
+      ? new Date(streak.last_activity_date).toISOString().split('T')[0] 
+      : null;
 
-    // Verificar si la racha está activa hoy
+    // Verificar si ya hubo actividad hoy
     const isActiveToday = lastActivity === today;
 
-    // Verificar si se rompió la racha
+    // Calcular si la racha se rompió
     let currentStreak = streak.current_streak_days;
     let streakStartDate = null;
     
@@ -40,15 +65,16 @@ export const getCurrentStreak = async (req, res) => {
       const diffTime = todayDate - lastDate;
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-      // Si pasaron más de 1 día, se rompió la racha
+      // Si pasaron más de 1 día, la racha se rompió
       if (diffDays > 1) {
         currentStreak = 0;
+        // Actualizar en BD para reflejar que se rompió
         await pool.query(
           `UPDATE user_streaks SET current_streak_days = 0 WHERE user_id = ?`,
           [userId]
         );
       } else if (currentStreak > 0) {
-        // Calcular fecha de inicio de la racha
+        // Calcular fecha de inicio de la racha actual
         streakStartDate = new Date(lastDate);
         streakStartDate.setDate(streakStartDate.getDate() - (currentStreak - 1));
         streakStartDate = streakStartDate.toISOString().split('T')[0];
@@ -67,16 +93,34 @@ export const getCurrentStreak = async (req, res) => {
   }
 };
 
-// POST /api/streaks/update
-// Se llama cuando el usuario completa una actividad (teoría o ejercicio)
+/**
+ * POST /api/streaks/update
+ * Actualiza la racha del usuario cuando completa una actividad
+ * 
+ * Se llama automáticamente cuando el usuario:
+ * - Completa un ejercicio exitosamente
+ * - Termina de leer contenido teórico
+ * - Realiza cualquier actividad de aprendizaje
+ * 
+ * Lógica:
+ * - Si es el primer día: racha = 1
+ * - Si es consecutivo (ayer tuvo actividad): racha + 1
+ * - Si ya activó hoy: no hace nada (solo cuenta 1 vez por día)
+ * - Si pasó más de 1 día: reinicia la racha a 1
+ * 
+ * @param {Request} req - Petición con req.user.id
+ * @param {Response} res - Respuesta JSON con racha actualizada
+ */
 export const updateStreak = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
+    if (!userId) {
+      return res.status(401).json({ error: "Autenticación requerida" });
+    }
 
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    // Obtener racha actual
+    // Obtener racha actual del usuario
     const [rows] = await pool.query(
       `SELECT current_streak_days, last_activity_date 
        FROM user_streaks 
@@ -84,8 +128,8 @@ export const updateStreak = async (req, res) => {
       [userId]
     );
 
+    // Primera vez: crear registro de racha
     if (rows.length === 0) {
-      // Primera vez, crear racha
       await pool.query(
         `INSERT INTO user_streaks (user_id, current_streak_days, last_activity_date)
          VALUES (?, 1, ?)`,
@@ -95,9 +139,11 @@ export const updateStreak = async (req, res) => {
     }
 
     const streak = rows[0];
-    const lastActivity = streak.last_activity_date ? new Date(streak.last_activity_date).toISOString().split('T')[0] : null;
+    const lastActivity = streak.last_activity_date 
+      ? new Date(streak.last_activity_date).toISOString().split('T')[0] 
+      : null;
 
-    // Si ya activó la racha hoy, no hacer nada
+    // Si ya hubo actividad hoy, no incrementar la racha
     if (lastActivity === today) {
       return res.json({
         current_streak_days: streak.current_streak_days,
@@ -105,7 +151,7 @@ export const updateStreak = async (req, res) => {
       });
     }
 
-    // Calcular diferencia de días
+    // Calcular nueva racha basada en diferencia de días
     let newStreak = 1;
     if (lastActivity) {
       const lastDate = new Date(lastActivity);
@@ -114,15 +160,15 @@ export const updateStreak = async (req, res) => {
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
       if (diffDays === 1) {
-        // Día consecutivo, incrementar racha
+        // Día consecutivo: incrementar racha
         newStreak = streak.current_streak_days + 1;
       } else if (diffDays > 1) {
-        // Se rompió la racha, reiniciar
+        // Se rompió la racha: reiniciar a 1
         newStreak = 1;
       }
     }
 
-    // Actualizar racha
+    // Actualizar racha en la base de datos
     await pool.query(
       `UPDATE user_streaks 
        SET current_streak_days = ?, last_activity_date = ?

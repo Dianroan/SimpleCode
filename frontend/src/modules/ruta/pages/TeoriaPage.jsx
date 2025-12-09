@@ -1,4 +1,16 @@
-// src/modules/ruta/pages/TeoriaPage.jsx
+/**
+ * Página TeoriaPage - Visualización de actividades de teoría
+ *
+ * Muestra:
+ * - Título y contenido de la actividad (Markdown renderizado)
+ * - Ejemplos de código con CodeBlockRenderer
+ * - Editor de código interactivo (AceEditor) con ejemplo de Console.WriteLine
+ * - Botón "Ejecutar ejemplo" que usa JDoodle para compilar y correr C#
+ * - Botón "Continuar" que marca la actividad como completada y va al siguiente paso
+ *
+ * Al completar, actualiza la racha del usuario automáticamente
+ */
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 

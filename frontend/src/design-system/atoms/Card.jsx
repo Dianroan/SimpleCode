@@ -1,3 +1,21 @@
+/**
+ * Componente Card - Tarjeta contenedora reutilizable
+ *
+ * Tarjeta con opciones de personalización:
+ * - title: Header de la tarjeta
+ * - footer: Footer de la tarjeta
+ * - gradient: Aplica degradado al fondo y header con colores púrpura
+ * - glow: Agrega sombra luminosa azul
+ * - className: Clases CSS adicionales
+ *
+ * @param {string} title - Título opcional del header
+ * @param {ReactNode} children - Contenido principal
+ * @param {ReactNode} footer - Contenido del footer
+ * @param {string} className - Clases CSS adicionales
+ * @param {boolean} gradient - Si aplica degradado
+ * @param {boolean} glow - Si aplica efecto de brillo
+ */
+
 export default function Card({
   title,
   children,

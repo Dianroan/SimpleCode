@@ -1,3 +1,13 @@
+/**
+ * Componente SideNav - Barra lateral de navegación
+ *
+ * Menú de navegación principal del dashboard con:
+ * - Logo de SimpleCode
+ * - Enlaces a: RUTA, DEBILIDADES, PERFIL
+ * - Resaltado dinámico del enlace activo
+ * - Footer con copyright
+ */
+
 import { NavLink } from "react-router-dom";
 
 export default function SideNav() {

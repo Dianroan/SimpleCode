@@ -1,3 +1,10 @@
+/**
+ * Componente TextField - Campo de texto completo con label y error
+ *
+ * Combina Label + Input + FormError en un solo componente reutilizable
+ * Maneja automáticamente el estado de validación visual
+ */
+
 import Label from "@ds/atoms/Label.jsx";
 import Input from "@ds/atoms/Input.jsx";
 import FormError from "@ds/atoms/FormError.jsx";

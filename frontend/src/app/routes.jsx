@@ -1,4 +1,18 @@
-// src/app/routes.jsx
+/**
+ * Configuración de todas las rutas de la aplicación
+ *
+ * RUTAS PÚBLICAS (solo accesibles sin autenticación):
+ * - Si el usuario ya tiene sesión, redirige automáticamente a /ruta
+ *
+ * RUTAS PRIVADAS (requieren autenticación):
+ * - Usan DashboardLayout que incluye el SideNav (menú lateral)
+ * - Si no hay sesión, ProtectedRoute redirige al login
+ *
+ * RUTAS ANIDADAS:
+ * - Las rutas hijas se renderizan dentro del DashboardLayout
+ * - teoria/:id y practica/:id reciben el ID como parámetro de URL
+ */
+
 import React from "react";
 import { Navigate } from "react-router-dom";
 
@@ -22,7 +36,7 @@ const Cursos = () => <div className="p-3">Cursos</div>;
 const Desafios = () => <div className="p-3">Desafíos</div>;
 
 export const routes = [
-  // PÚBLICAS: si hay sesión -> /ruta
+  // ========== RUTAS PÚBLICAS ==========
   {
     path: "/",
     element: (
@@ -48,12 +62,12 @@ export const routes = [
     ),
   },
 
-  // PRIVADAS (todas cuelgan del layout con SideNav)
+  // ========== RUTAS PRIVADAS ==========
   {
     path: "/",
     element: (
       <ProtectedRoute>
-        <DashboardLayout />
+        <DashboardLayout /> {/* Layout con SideNav + <Outlet /> para hijos */}
       </ProtectedRoute>
     ),
     children: [
@@ -67,6 +81,6 @@ export const routes = [
     ],
   },
 
-  // Si no matchea:
+  // Redirigir rutas no encontradas
   { path: "*", element: <Navigate to="/" replace /> },
 ];

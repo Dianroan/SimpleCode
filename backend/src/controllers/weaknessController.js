@@ -1,18 +1,47 @@
+/**
+ * Controller de Debilidades (Weaknesses)
+ * 
+ * Analiza y registra las áreas de dificultad del usuario basándose en:
+ * - Ejercicios fallados
+ * - Intentos múltiples en ejercicios
+ * - Reportes manuales de la comunidad
+ * 
+ * Las debilidades se organizan por etiquetas (tags) que representan temas
+ * como "bucles", "arrays", "recursión", etc.
+ */
+
 import { pool } from "../db/pool.js";
 
-// POST /api/weaknesses/record-attempt
-// body: { exercise_id, success: boolean, first_try?: boolean }
+/**
+ * POST /api/weaknesses/record-attempt
+ * Registra un intento de ejercicio y actualiza las debilidades del usuario
+ * 
+ * Se llama automáticamente cuando el usuario intenta un ejercicio.
+ * 
+ * Lógica:
+ * - Si falla (success=false): incrementa +1 el contador de debilidad en cada tag
+ * - Si pasa en primer intento (success=true, first_try=true): decrementa -1 (min 0)
+ * - Esto permite que el usuario mejore sus debilidades al resolver ejercicios
+ * 
+ * @param {Request} req - Body: { exercise_id, success: boolean, first_try?: boolean }
+ * @param {Response} res - Confirmación de registro
+ */
 export const recordAttempt = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
-
-    const { exercise_id, success, first_try } = req.body;
-    if (!exercise_id || typeof success !== "boolean") {
-      return res.status(400).json({ error: "exercise_id y success son requeridos" });
+    if (!userId) {
+      return res.status(401).json({ error: "Autenticación requerida" });
     }
 
-    // Obtener etiquetas del ejercicio
+    const { exercise_id, success, first_try } = req.body;
+    
+    if (!exercise_id || typeof success !== "boolean") {
+      return res.status(400).json({ 
+        error: "exercise_id y success son requeridos" 
+      });
+    }
+
+    // Obtener todas las etiquetas (tags) asociadas al ejercicio
     const [tags] = await pool.query(
       `SELECT t.id, t.name FROM tags t
        JOIN exercise_tags et ON et.tag_id = t.id
@@ -21,18 +50,19 @@ export const recordAttempt = async (req, res) => {
     );
 
     if (!tags || tags.length === 0) {
-      return res.status(200).json({ message: "No hay etiquetas asociadas a este ejercicio" });
+      return res.status(200).json({ 
+        message: "No hay etiquetas asociadas a este ejercicio" 
+      });
     }
 
-    // Para cada etiqueta, actualizar el contador en user_weaknesses
-    // Si el intento fue fallido -> +1
-    // Si fue exitoso y first_try === true -> -1 (sin bajar de 0)
+    // Actualizar contadores de debilidad para cada etiqueta
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
 
       for (const tag of tags) {
         if (!success) {
+          // Intento fallido: incrementar contador de debilidad
           await conn.query(
             `INSERT INTO user_weaknesses (user_id, tag_id, value)
              VALUES (?, ?, 1)
@@ -40,7 +70,8 @@ export const recordAttempt = async (req, res) => {
             [userId, tag.id]
           );
         } else if (success && first_try) {
-          // Decrement but not below zero
+          // Éxito en primer intento: decrementar contador (mínimo 0)
+          // Esto recompensa resolver ejercicios correctamente
           await conn.query(
             `INSERT INTO user_weaknesses (user_id, tag_id, value)
              VALUES (?, ?, 0)
@@ -65,21 +96,36 @@ export const recordAttempt = async (req, res) => {
   }
 };
 
-// POST /api/weaknesses/community-report
-// body: { tags: [tagId], difficulty: 1|2|3 }
+/**
+ * POST /api/weaknesses/community-report
+ * Permite al usuario reportar manualmente sus debilidades
+ * 
+ * Usado en desafíos de la comunidad o auto-evaluación donde
+ * el usuario identifica temas con los que tiene dificultad.
+ * 
+ * @param {Request} req - Body: { tags: [tagId], difficulty: 1|2|3 }
+ * @param {Response} res - Confirmación de registro
+ */
 export const communityReport = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
-
-    const { tags, difficulty } = req.body;
-    if (!Array.isArray(tags) || tags.length === 0 || ![1,2,3].includes(Number(difficulty))) {
-      return res.status(400).json({ error: "tags y difficulty (1-3) son requeridos" });
+    if (!userId) {
+      return res.status(401).json({ error: "Autenticación requerida" });
     }
 
+    const { tags, difficulty } = req.body;
+    
+    if (!Array.isArray(tags) || tags.length === 0 || ![1,2,3].includes(Number(difficulty))) {
+      return res.status(400).json({ 
+        error: "tags y difficulty (1-3) son requeridos" 
+      });
+    }
+
+    // Incrementar debilidad según el nivel de dificultad reportado
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
+      
       for (const tagId of tags) {
         await conn.query(
           `INSERT INTO user_weaknesses (user_id, tag_id, value)
@@ -88,6 +134,7 @@ export const communityReport = async (req, res) => {
           [userId, tagId, Number(difficulty)]
         );
       }
+      
       await conn.commit();
     } catch (e) {
       await conn.rollback();
@@ -103,11 +150,23 @@ export const communityReport = async (req, res) => {
   }
 };
 
-// GET /api/weaknesses/top
+/**
+ * GET /api/weaknesses/top
+ * Obtiene las principales debilidades del usuario
+ * 
+ * Retorna los temas (tags) con mayor contador de fallos,
+ * ordenados de mayor a menor debilidad.
+ * Útil para mostrar gráficas o recomendaciones de estudio.
+ * 
+ * @param {Request} req - Petición autenticada
+ * @param {Response} res - Array de tags con sus contadores
+ */
 export const getTopWeaknesses = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
+    if (!userId) {
+      return res.status(401).json({ error: "Autenticación requerida" });
+    }
 
     const [rows] = await pool.query(
       `SELECT t.id, t.name, COALESCE(uw.value,0) as value
@@ -126,11 +185,22 @@ export const getTopWeaknesses = async (req, res) => {
   }
 };
 
-// GET /api/weaknesses/by-category
+/**
+ * GET /api/weaknesses/by-category
+ * Obtiene debilidades agrupadas por categoría/curso
+ * 
+ * Agrupa las debilidades por cursos para identificar
+ * qué secciones del material necesitan más práctica.
+ * 
+ * @param {Request} req - Petición autenticada
+ * @param {Response} res - Array de categorías con total de debilidades
+ */
 export const getWeaknessesByCategory = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
+    if (!userId) {
+      return res.status(401).json({ error: "Autenticación requerida" });
+    }
 
     // Obtener categorías (cursos) donde el usuario tiene debilidades
     const [categories] = await pool.query(
@@ -153,12 +223,25 @@ export const getWeaknessesByCategory = async (req, res) => {
   }
 };
 
-// GET /api/weaknesses/failed-exercises
-// Retorna los ejercicios específicos que el usuario ha fallado con su contador
+/**
+ * GET /api/weaknesses/failed-exercises
+ * Retorna los ejercicios específicos que el usuario ha fallado
+ * 
+ * Muestra una lista de ejercicios con:
+ * - Número de veces fallado
+ * - Fecha del último intento
+ * 
+ * Útil para que el usuario identifique ejercicios que debe repasar.
+ * 
+ * @param {Request} req - Petición autenticada
+ * @param {Response} res - Array de ejercicios fallidos con contadores
+ */
 export const getFailedExercises = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
+    if (!userId) {
+      return res.status(401).json({ error: "Autenticación requerida" });
+    }
 
     const [exercises] = await pool.query(
       `SELECT 

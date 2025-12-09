@@ -1,11 +1,28 @@
+/**
+ * Rutas de Ruta de Aprendizaje (Learning Path)
+ * 
+ * Gestiona el acceso y progreso del usuario a trav\u00e9s de los cursos y actividades.
+ * Incluye acceso a teor\u00eda, ejercicios, y seguimiento de progreso.
+ * Todas las rutas requieren autenticaci\u00f3n.
+ */
+
 import { Router } from "express";
 import { pool } from "../db/pool.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-// GET /api/learning-path
-// Regresa la ruta de aprendizaje para el usuario autenticado
+/**
+ * GET /api/learning-path
+ * Obtiene la ruta de aprendizaje completa para el usuario autenticado
+ * 
+ * Retorna todos los cursos/actividades con su estado:
+ * - LOCKED: Bloqueado (no disponible a\u00fan)
+ * - UNLOCKED: Desbloqueado (puede acceder)
+ * - COMPLETED: Completado
+ * 
+ * Se ordenan por step_order para mostrar la secuencia correcta
+ */
 router.get("/", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -37,12 +54,24 @@ router.get("/", requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/learning-path/theory/:courseId
-// Regresa la info de la actividad de teoría (contenido + ejemplos)
+/**
+ * GET /api/learning-path/theory/:courseId
+ * Obtiene el contenido de una actividad de teoría
+ * 
+ * Retorna:
+ * - Información de la teoría (título, contenido, tiempo estimado)
+ * - Ejemplos de código asociados (ordenados por example_order)
+ * 
+ * Cada ejemplo incluye:
+ * - Código de ejemplo
+ * - Output esperado
+ * - Explicación del concepto
+ */
 router.get("/theory/:courseId", requireAuth, async (req, res) => {
   try {
     const courseId = req.params.courseId;
 
+    // Obtener información de la actividad de teoría
     const [theoryRows] = await pool.query(
       `
       SELECT 
@@ -62,6 +91,7 @@ router.get("/theory/:courseId", requireAuth, async (req, res) => {
 
     const theory = theoryRows[0];
 
+    // Obtener ejemplos de código para la teoría
     const [exampleRows] = await pool.query(
       `
       SELECT 
@@ -92,15 +122,23 @@ router.get("/theory/:courseId", requireAuth, async (req, res) => {
   }
 });
 
-// POST /api/learning-path/complete/:courseId
-// Marca una actividad como COMPLETED para el usuario autenticado
-// Para ejercicios: verifica que el usuario haya pasado todos los tests
+/**
+ * POST /api/learning-path/complete/:courseId
+ * Marca una actividad como COMPLETED para el usuario autenticado
+ * 
+ * Validación especial para ejercicios:
+ * - Si la actividad es un ejercicio, verifica que el usuario haya
+ *   pasado todos los tests exitosamente antes de marcarlo como completado
+ * - Para teoría y otras actividades, simplemente lo marca como completado
+ * 
+ * Retorna error 403 si intenta completar un ejercicio sin haberlo resuelto
+ */
 router.post("/complete/:courseId", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
     const courseId = req.params.courseId;
 
-    // Verificar si la actividad es un ejercicio y validar que haya pasado los tests
+    // Obtener tipo de actividad del curso
     const [courseRows] = await pool.query(
       `SELECT activity_type FROM courses WHERE id = ?`,
       [courseId]
@@ -112,9 +150,10 @@ router.post("/complete/:courseId", requireAuth, async (req, res) => {
 
     const activityType = courseRows[0].activity_type?.toLowerCase() || "";
     
+    // Validación especial para ejercicios
     // Si es un ejercicio (exercise o practice), verificar que haya pasado todos los tests
     if (activityType.includes("exercise") || activityType.includes("practice")) {
-      // Verificar si el usuario tiene al menos un intento exitoso en este ejercicio
+      // Verificar si el usuario tiene al menos un intento exitoso
       const [attempts] = await pool.query(
         `SELECT id FROM exercise_attempts WHERE user_id = ? AND exercise_id = ? AND is_successful = 1 LIMIT 1`,
         [userId, courseId]
@@ -128,14 +167,14 @@ router.post("/complete/:courseId", requireAuth, async (req, res) => {
       }
     }
 
-    // Verificar si ya hay un registro
+    // Verificar si ya existe un registro de progreso para esta actividad
     const [rows] = await pool.query(
       `SELECT id, status FROM user_course_progress WHERE user_id = ? AND course_id = ?`,
       [userId, courseId]
     );
 
     if (rows.length > 0) {
-      // Actualizar a COMPLETED si no lo está
+      // Si ya existe, actualizar a COMPLETED (si no lo está ya)
       if (rows[0].status !== "COMPLETED") {
         await pool.query(
           `UPDATE user_course_progress SET status = 'COMPLETED' WHERE id = ?`,
@@ -143,7 +182,7 @@ router.post("/complete/:courseId", requireAuth, async (req, res) => {
         );
       }
     } else {
-      // Insertar registro (tabla sin columnas created_at/updated_at)
+      // Si no existe, crear nuevo registro como COMPLETED
       await pool.query(
         `INSERT INTO user_course_progress (user_id, course_id, status) VALUES (?, ?, 'COMPLETED')`,
         [userId, courseId]
@@ -157,22 +196,30 @@ router.post("/complete/:courseId", requireAuth, async (req, res) => {
   }
 });
 
-export default router;
-
-// GET /api/learning-path/progress
-// Retorna progreso global del usuario y la siguiente actividad por hacer
+/**
+ * GET /api/learning-path/progress
+ * Retorna el progreso global del usuario en la ruta de aprendizaje
+ * 
+ * Calcula:
+ * - Total de actividades disponibles
+ * - Actividades completadas por el usuario
+ * - Porcentaje de progreso
+ * - Siguiente actividad a realizar (primera no completada)
+ * 
+ * Útil para mostrar barras de progreso y guiar al usuario en su siguiente paso
+ */
 router.get("/progress", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Total de actividades activas
+    // Contar total de actividades activas en el sistema
     const [totalRows] = await pool.query(
       `SELECT COUNT(*) AS total FROM courses WHERE is_active = 1`
     );
 
     const total = totalRows[0]?.total || 0;
 
-    // Completadas por el usuario
+    // Contar actividades completadas por el usuario
     const [completedRows] = await pool.query(
       `SELECT COUNT(*) AS completed FROM user_course_progress WHERE user_id = ? AND status = 'COMPLETED'`,
       [userId]
@@ -180,9 +227,10 @@ router.get("/progress", requireAuth, async (req, res) => {
 
     const completed = completedRows[0]?.completed || 0;
 
+    // Calcular porcentaje de progreso
     const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
 
-    // Obtener la siguiente actividad no completada (por step_order)
+    // Obtener la siguiente actividad no completada según el orden
     const [nextRows] = await pool.query(
       `
       SELECT c.id, c.title, c.activity_type, c.step_order, COALESCE(ucp.status, 'LOCKED') AS status
@@ -195,6 +243,7 @@ router.get("/progress", requireAuth, async (req, res) => {
       [userId]
     );
 
+    // Buscar la primera actividad no completada
     let nextActivity = null;
     for (const r of nextRows) {
       if (r.status !== "COMPLETED") {
@@ -209,3 +258,5 @@ router.get("/progress", requireAuth, async (req, res) => {
     return res.status(500).json({ message: "Error getting progress" });
   }
 });
+
+export default router;

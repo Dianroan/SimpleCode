@@ -1,22 +1,51 @@
+/**
+ * Rutas de Debilidades (Weaknesses)
+ * 
+ * Endpoints para registrar intentos, obtener análisis de debilidades
+ * y ejercicios fallados. Todas las rutas requieren autenticación.
+ */
+
 import express from "express";
-import { recordAttempt, communityReport, getTopWeaknesses, getWeaknessesByCategory, getFailedExercises } from "../controllers/weaknessController.js";
+import { 
+  recordAttempt, 
+  communityReport, 
+  getTopWeaknesses, 
+  getWeaknessesByCategory, 
+  getFailedExercises 
+} from "../controllers/weaknessController.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Registro de intento (éxito/fallo)
+/**
+ * POST /api/weaknesses/record-attempt
+ * Registra un intento de ejercicio (exitoso o fallido)
+ * Actualiza automáticamente los contadores de debilidad por tema
+ */
 router.post("/record-attempt", requireAuth, recordAttempt);
 
-// Reporte desde desafíos de la comunidad
+/**
+ * POST /api/weaknesses/community-report
+ * Permite reportar manualmente debilidades desde desafíos de la comunidad
+ */
 router.post("/community-report", requireAuth, communityReport);
 
-// Obtener top debilidades del usuario
+/**
+ * GET /api/weaknesses/top
+ * Obtiene los temas con mayor número de fallos del usuario
+ */
 router.get("/top", requireAuth, getTopWeaknesses);
 
-// Obtener debilidades por categoría
+/**
+ * GET /api/weaknesses/by-category
+ * Obtiene debilidades agrupadas por categoría/curso
+ */
 router.get("/by-category", requireAuth, getWeaknessesByCategory);
 
-// Obtener ejercicios fallidos específicos
+/**
+ * GET /api/weaknesses/failed-exercises
+ * Retorna ejercicios específicos que el usuario ha fallado con contadores
+ */
 router.get("/failed-exercises", requireAuth, getFailedExercises);
 
 export default router;

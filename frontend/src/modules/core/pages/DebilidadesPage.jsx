@@ -1,3 +1,15 @@
+/**
+ * Página DebilidadesPage - Análisis completo de puntos débiles
+ *
+ * Muestra:
+ * 1. Gráfica de radar (top 6 debilidades)
+ * 2. Gráfica de barras (todas las debilidades con colores vibrantes)
+ * 3. Gráfica de pastel (debilidades por categoría)
+ * 4. Lista de ejercicios fallados con opción de reintentar
+ *
+ * Carga 3 datasets en paralelo: top weaknesses, categories, failed exercises
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto";
 import {

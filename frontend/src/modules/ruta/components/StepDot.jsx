@@ -1,3 +1,19 @@
+/**
+ * Componente StepDot - Círculo indicador de paso
+ *
+ * Círculo visual que representa un paso en la ruta:
+ * - Icono: 📘 para teoría, 💻 para práctica
+ * - Completado: Gradiente verde con checkmark ✅
+ * - Siguiente: Gradiente naranja con animación pulse
+ * - Disponible: Borde azul
+ * - Bloqueado: Gris
+ *
+ * @param {string} kind - "theory" o "exercise"
+ * @param {boolean} isCompleted - Si está completado
+ * @param {boolean} isAvailable - Si está disponible
+ * @param {boolean} isNext - Si es el siguiente paso
+ */
+
 import Button from "../../../design-system/atoms/Button";
 
 export default function StepDot({ kind, isCompleted, isAvailable, isNext }) {

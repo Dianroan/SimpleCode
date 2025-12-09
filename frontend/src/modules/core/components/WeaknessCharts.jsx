@@ -1,3 +1,14 @@
+/**
+ * Componente WeaknessCharts - Gráficas de puntos débiles
+ *
+ * Muestra dos gráficas con Chart.js:
+ * 1. Gráfica de radar - Top 6 debilidades (vista general)
+ * 2. Gráfica de barras - Todas las debilidades con colores (vista detallada)
+ *
+ * Carga datos de la API al montar el componente
+ * Muestra estado de carga y mensaje cuando no hay datos
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Chart from "chart.js/auto";

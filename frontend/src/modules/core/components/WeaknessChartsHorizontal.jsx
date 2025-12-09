@@ -1,3 +1,13 @@
+/**
+ * Componente WeaknessChartsHorizontal - Gráficas de debilidades en layout horizontal
+ *
+ * Similar a WeaknessCharts pero con disposición lado a lado (2 columnas):
+ * - Columna izquierda: Gráfica de radar (top 6 debilidades)
+ * - Columna derecha: Gráfica de barras (todas las debilidades)
+ *
+ * Usado en PerfilPage para mostrar análisis en formato compacto
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Chart from "chart.js/auto";

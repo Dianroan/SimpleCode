@@ -1,3 +1,13 @@
+/**
+ * Layout DashboardLayout - Estructura principal del dashboard
+ *
+ * Layout de dos columnas:
+ * - Barra lateral izquierda: SideNav con navegación
+ * - Área principal derecha: Contenido dinámico (Outlet)
+ *
+ * Incluye elementos decorativos de fondo (círculos con gradientes)
+ */
+
 import { Outlet } from "react-router-dom";
 import SideNav from "@core/components/SideNav.jsx";
 

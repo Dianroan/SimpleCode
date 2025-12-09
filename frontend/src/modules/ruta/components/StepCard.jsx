@@ -1,3 +1,20 @@
+/**
+ * Componente StepCard - Tarjeta de visualización de paso en la ruta
+ *
+ * Muestra información del paso con estilos dinámicos según estado:
+ * - isCompleted: Verde con check, indica paso finalizado
+ * - isNext: Naranja con badge "Siguiente", anima con pulse
+ * - isAvailable: Azul, indica que se puede acceder
+ * - Bloqueado: Gris, no se puede acceder aún
+ *
+ * @param {string} kind - Tipo: "theory" o "exercise"
+ * @param {string} title - Título del paso
+ * @param {boolean} isCompleted - Si está completado
+ * @param {boolean} isAvailable - Si está disponible para hacer
+ * @param {boolean} isNext - Si es el siguiente paso recomendado
+ * @param {number} stepOrder - Número del paso en la secuencia
+ */
+
 import Card from "../../../design-system/atoms/Card";
 
 export default function StepCard({

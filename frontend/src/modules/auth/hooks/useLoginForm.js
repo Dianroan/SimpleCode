@@ -1,4 +1,16 @@
-// Mensajes en español; helpers de validate.js
+/**
+ * Hook para manejar el formulario de inicio de sesión
+ * 
+ * Gestiona:
+ * - Estado del formulario (username, password)
+ * - Validación de campos
+ * - Envío de datos al backend
+ * - Mensajes de error
+ * 
+ * @param {Function} onSubmit - Callback al enviar el formulario válido
+ * @returns {Object} { form, errors, submitting, handleChange, handleSubmit }
+ */
+
 import { useState, useCallback } from "react";
 import { s, isUsername, requiredMsg as _req } from "@utils/validate.js";
 
@@ -19,6 +31,11 @@ export default function useLoginForm({ onSubmit } = {}) {
     [setField]
   );
 
+  /**
+   * Valida los campos del formulario
+   * - username: Requerido, formato válido (3+ caracteres)
+   * - password: Requerido
+   */
   const validate = useCallback(() => {
     const er = {};
     const username = s(form.username);

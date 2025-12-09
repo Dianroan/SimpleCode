@@ -1,3 +1,15 @@
+/**
+ * Componente CodeBlockRenderer - Renderizador de bloques de código
+ *
+ * Procesa HTML con contenido mixto (texto + código):
+ * - Detecta bloques <pre><code> y los reemplaza con AceEditor
+ * - Calcula altura dinámica según número de líneas
+ * - Renderiza el resto del HTML normalmente
+ * - Usa useMemo para optimizar procesamiento
+ *
+ * @param {string} htmlContent - HTML con bloques pre/code a procesar
+ */
+
 import { useMemo } from "react";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-csharp";
