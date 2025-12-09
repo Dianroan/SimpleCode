@@ -239,14 +239,14 @@ export default function DebilidadesPage() {
   return (
     <div className="container-fluid p-4 animate-fade-in">
       <div className="mb-5">
-        <h1 className="fw-bold mb-2" style={{ fontSize: '2.5rem' }}>
-          <span style={{ marginRight: '0.5rem' }}>📊</span>
+        <h1 className="fw-bold mb-2" style={{ fontSize: "2.5rem" }}>
+          <span style={{ marginRight: "0.5rem" }}>📊</span>
           <span
             style={{
-              background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              background: "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
             }}
           >
             Debilidades

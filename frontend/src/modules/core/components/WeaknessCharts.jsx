@@ -73,31 +73,31 @@ export default function WeaknessCharts() {
             display: true,
             position: "top",
             labels: {
-              color: '#1f2937',
-              font: { size: 11, weight: '600' },
+              color: "#1f2937",
+              font: { size: 11, weight: "600" },
               padding: 10,
             },
           },
           tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
             padding: 10,
             cornerRadius: 6,
-            titleFont: { size: 12, weight: 'bold' },
+            titleFont: { size: 12, weight: "bold" },
             bodyFont: { size: 11 },
           },
         },
         scales: {
           r: {
             beginAtZero: true,
-            grid: { color: 'rgba(0, 0, 0, 0.06)' },
-            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+            grid: { color: "rgba(0, 0, 0, 0.06)" },
+            angleLines: { color: "rgba(0, 0, 0, 0.1)" },
             pointLabels: {
-              color: '#4b5563',
-              font: { size: 10, weight: '600' },
+              color: "#4b5563",
+              font: { size: 10, weight: "600" },
             },
             ticks: {
-              color: '#9ca3af',
-              backdropColor: 'transparent',
+              color: "#9ca3af",
+              backdropColor: "transparent",
               font: { size: 9 },
             },
           },
@@ -123,12 +123,12 @@ export default function WeaknessCharts() {
     const values = data.map((d) => d.value);
 
     const colors = [
-      '#ec4899', // pink
-      '#8b5cf6', // purple
-      '#3b82f6', // blue
-      '#10b981', // green
-      '#f59e0b', // orange
-      '#ef4444', // red
+      "#ec4899", // pink
+      "#8b5cf6", // purple
+      "#3b82f6", // blue
+      "#10b981", // green
+      "#f59e0b", // orange
+      "#ef4444", // red
     ];
 
     const ctx = canvasRef.current.getContext("2d");
@@ -154,15 +154,15 @@ export default function WeaknessCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
             padding: 10,
             cornerRadius: 6,
-            titleFont: { size: 12, weight: 'bold' },
+            titleFont: { size: 12, weight: "bold" },
             bodyFont: { size: 11 },
             callbacks: {
-              label: function(context) {
+              label: function (context) {
                 return `Fallos: ${context.parsed.y}`;
-              }
+              },
             },
           },
         },
@@ -170,19 +170,19 @@ export default function WeaknessCharts() {
           y: {
             beginAtZero: true,
             grid: {
-              color: 'rgba(0, 0, 0, 0.05)',
+              color: "rgba(0, 0, 0, 0.05)",
               drawBorder: false,
             },
             ticks: {
-              color: '#6b7280',
-              font: { size: 10, weight: '600' },
+              color: "#6b7280",
+              font: { size: 10, weight: "600" },
             },
           },
           x: {
             grid: { display: false },
             ticks: {
-              color: '#4b5563',
-              font: { size: 10, weight: '600' },
+              color: "#4b5563",
+              font: { size: 10, weight: "600" },
             },
           },
         },
@@ -194,26 +194,32 @@ export default function WeaknessCharts() {
     };
   }, [data]);
 
-  if (loading) return (
-    <div className="text-center py-3">
-      <div className="spinner mx-auto mb-2" style={{ width: '25px', height: '25px', borderWidth: '2px' }} />
-      <p className="text-muted small mb-0">Cargando...</p>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="text-center py-3">
+        <div
+          className="spinner mx-auto mb-2"
+          style={{ width: "25px", height: "25px", borderWidth: "2px" }}
+        />
+        <p className="text-muted small mb-0">Cargando...</p>
+      </div>
+    );
 
   if (data.length === 0)
     return (
-      <div 
-        className="text-center py-3" 
+      <div
+        className="text-center py-3"
         style={{
-          background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(139, 92, 246, 0.05))',
-          borderRadius: '0.75rem',
-          padding: '1.5rem',
+          background:
+            "linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(139, 92, 246, 0.05))",
+          borderRadius: "0.75rem",
+          padding: "1.5rem",
         }}
       >
-        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📊</div>
+        <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📊</div>
         <p className="text-muted small mb-0">
-          Sin datos aún.<br/>
+          Sin datos aún.
+          <br />
           Realiza ejercicios para análisis.
         </p>
       </div>
@@ -223,38 +229,44 @@ export default function WeaknessCharts() {
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {/* Gráfica de radar */}
       <div style={{ width: "100%" }}>
-        <div 
+        <div
           className="d-flex align-items-center gap-2 mb-2"
           style={{
-            paddingBottom: '0.5rem',
-            borderBottom: '2px solid rgba(236, 72, 153, 0.2)',
+            paddingBottom: "0.5rem",
+            borderBottom: "2px solid rgba(236, 72, 153, 0.2)",
           }}
         >
-          <span style={{ fontSize: '1.1rem' }}>🎯</span>
-          <h6 className="mb-0 fw-bold" style={{ color: '#ec4899', fontSize: '0.9rem' }}>
+          <span style={{ fontSize: "1.1rem" }}>🎯</span>
+          <h6
+            className="mb-0 fw-bold"
+            style={{ color: "#ec4899", fontSize: "0.9rem" }}
+          >
             Puntos Débiles
           </h6>
         </div>
-        <div style={{ height: '220px' }}>
+        <div style={{ height: "220px" }}>
           <canvas ref={radarCanvasRef} />
         </div>
       </div>
 
       {/* Gráfica de barras */}
       <div style={{ width: "100%" }}>
-        <div 
+        <div
           className="d-flex align-items-center gap-2 mb-2"
           style={{
-            paddingBottom: '0.5rem',
-            borderBottom: '2px solid rgba(139, 92, 246, 0.2)',
+            paddingBottom: "0.5rem",
+            borderBottom: "2px solid rgba(139, 92, 246, 0.2)",
           }}
         >
-          <span style={{ fontSize: '1.1rem' }}>📊</span>
-          <h6 className="mb-0 fw-bold" style={{ color: '#8b5cf6', fontSize: '0.9rem' }}>
+          <span style={{ fontSize: "1.1rem" }}>📊</span>
+          <h6
+            className="mb-0 fw-bold"
+            style={{ color: "#8b5cf6", fontSize: "0.9rem" }}
+          >
             Análisis Detallado
           </h6>
         </div>
-        <div style={{ height: '220px' }}>
+        <div style={{ height: "220px" }}>
           <canvas ref={canvasRef} />
         </div>
       </div>

@@ -276,57 +276,63 @@ export default function RutaPath() {
         </div>
 
         <div className="col-lg-4">
-          <div 
-            className="card hover-lift mb-3" 
+          <div
+            className="card hover-lift mb-3"
             style={{
-              borderRadius: '1.5rem',
-              border: 'none',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(34, 211, 238, 0.05) 100%)',
-              borderLeft: '5px solid #10b981',
-              padding: '1.5rem',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+              borderRadius: "1.5rem",
+              border: "none",
+              background:
+                "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(34, 211, 238, 0.05) 100%)",
+              borderLeft: "5px solid #10b981",
+              padding: "1.5rem",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
             }}
           >
             <div className="d-flex align-items-center gap-2 mb-3">
-              <span style={{ fontSize: '1.5rem' }}>📈</span>
-              <h5 className="fw-bold mb-0" style={{ color: '#10b981' }}>
+              <span style={{ fontSize: "1.5rem" }}>📈</span>
+              <h5 className="fw-bold mb-0" style={{ color: "#10b981" }}>
                 Progreso del Curso
               </h5>
             </div>
 
             {progressLoading && (
               <div className="text-center py-3">
-                <div className="spinner mx-auto" style={{ width: '30px', height: '30px', borderWidth: '3px' }} />
+                <div
+                  className="spinner mx-auto"
+                  style={{ width: "30px", height: "30px", borderWidth: "3px" }}
+                />
               </div>
             )}
 
             {!progressLoading && progress && (
               <>
                 <div className="mb-3">
-                  <div 
-                    className="d-flex justify-content-between align-items-center mb-2"
-                  >
+                  <div className="d-flex justify-content-between align-items-center mb-2">
                     <span className="text-muted small">Completado</span>
-                    <span className="fw-bold" style={{ fontSize: '1.25rem', color: '#10b981' }}>
+                    <span
+                      className="fw-bold"
+                      style={{ fontSize: "1.25rem", color: "#10b981" }}
+                    >
                       {progress.percentage}%
                     </span>
                   </div>
-                  <div 
-                    className="progress" 
-                    style={{ 
-                      height: '12px',
-                      borderRadius: '50px',
-                      background: 'rgba(16, 185, 129, 0.1)',
+                  <div
+                    className="progress"
+                    style={{
+                      height: "12px",
+                      borderRadius: "50px",
+                      background: "rgba(16, 185, 129, 0.1)",
                     }}
                   >
                     <div
                       className="progress-bar"
                       role="progressbar"
-                      style={{ 
+                      style={{
                         width: `${progress.percentage}%`,
-                        background: 'linear-gradient(90deg, #10b981 0%, #22d3ee 100%)',
-                        borderRadius: '50px',
-                        transition: 'width 1s ease',
+                        background:
+                          "linear-gradient(90deg, #10b981 0%, #22d3ee 100%)",
+                        borderRadius: "50px",
+                        transition: "width 1s ease",
                       }}
                       aria-valuenow={progress.percentage}
                       aria-valuemin="0"
@@ -335,18 +341,41 @@ export default function RutaPath() {
                   </div>
                 </div>
 
-                <div className="mb-3 text-center p-3" style={{ background: 'rgba(16, 185, 129, 0.1)', borderRadius: '0.75rem' }}>
-                  <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#10b981' }}>
-                    {progress.completed} <span style={{ fontSize: '1rem', color: '#6b7280' }}>/ {progress.total}</span>
+                <div
+                  className="mb-3 text-center p-3"
+                  style={{
+                    background: "rgba(16, 185, 129, 0.1)",
+                    borderRadius: "0.75rem",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "1.75rem",
+                      fontWeight: "700",
+                      color: "#10b981",
+                    }}
+                  >
+                    {progress.completed}{" "}
+                    <span style={{ fontSize: "1rem", color: "#6b7280" }}>
+                      / {progress.total}
+                    </span>
                   </div>
-                  <div className="small text-muted">actividades completadas</div>
+                  <div className="small text-muted">
+                    actividades completadas
+                  </div>
                 </div>
 
                 {progress.nextActivity ? (
                   <div>
-                    <p className="small text-muted mb-2">SIGUIENTE ACTIVIDAD:</p>
-                    <p className="fw-semibold mb-3" style={{ color: '#1f2937', fontSize: '0.9rem' }}>
-                      {progress.nextActivity.step_order}. {progress.nextActivity.title}
+                    <p className="small text-muted mb-2">
+                      SIGUIENTE ACTIVIDAD:
+                    </p>
+                    <p
+                      className="fw-semibold mb-3"
+                      style={{ color: "#1f2937", fontSize: "0.9rem" }}
+                    >
+                      {progress.nextActivity.step_order}.{" "}
+                      {progress.nextActivity.title}
                     </p>
                     <button
                       className="btn w-100"
@@ -359,29 +388,36 @@ export default function RutaPath() {
                         )
                       }
                       style={{
-                        background: 'linear-gradient(135deg, #10b981 0%, #22d3ee 100%)',
-                        color: 'white',
-                        fontWeight: '600',
-                        borderRadius: '0.75rem',
-                        padding: '0.75rem',
-                        border: 'none',
-                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                        transition: 'all 0.25s ease',
+                        background:
+                          "linear-gradient(135deg, #10b981 0%, #22d3ee 100%)",
+                        color: "white",
+                        fontWeight: "600",
+                        borderRadius: "0.75rem",
+                        padding: "0.75rem",
+                        border: "none",
+                        boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
+                        transition: "all 0.25s ease",
                       }}
                     >
                       🚀 Continuar
                     </button>
                   </div>
                 ) : (
-                  <div 
-                    className="text-center p-3" 
+                  <div
+                    className="text-center p-3"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 211, 238, 0.1))',
-                      borderRadius: '0.75rem',
+                      background:
+                        "linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 211, 238, 0.1))",
+                      borderRadius: "0.75rem",
                     }}
                   >
-                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
-                    <p className="fw-semibold mb-0" style={{ color: '#10b981' }}>
+                    <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
+                      🎉
+                    </div>
+                    <p
+                      className="fw-semibold mb-0"
+                      style={{ color: "#10b981" }}
+                    >
                       ¡Completaste todo!
                     </p>
                   </div>
@@ -389,36 +425,39 @@ export default function RutaPath() {
               </>
             )}
             {!progressLoading && !progress && (
-              <p className="text-muted text-center">No se pudo cargar el progreso.</p>
+              <p className="text-muted text-center">
+                No se pudo cargar el progreso.
+              </p>
             )}
           </div>
 
           {/* Sección de debilidades */}
-          <div 
-            className="card hover-lift" 
+          <div
+            className="card hover-lift"
             style={{
-              borderRadius: '1.5rem',
-              border: 'none',
-              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
-              borderLeft: '5px solid #ec4899',
-              padding: '1.5rem',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+              borderRadius: "1.5rem",
+              border: "none",
+              background:
+                "linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)",
+              borderLeft: "5px solid #ec4899",
+              padding: "1.5rem",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
             }}
           >
             <div className="d-flex align-items-center justify-content-between mb-3">
               <div className="d-flex align-items-center gap-2">
-                <span style={{ fontSize: '1.5rem' }}>📊</span>
-                <h5 className="fw-bold mb-0" style={{ color: '#ec4899' }}>
+                <span style={{ fontSize: "1.5rem" }}>📊</span>
+                <h5 className="fw-bold mb-0" style={{ color: "#ec4899" }}>
                   Debilidades
                 </h5>
               </div>
               <Link
                 to="/debilidades"
-                style={{ 
-                  textDecoration: 'none',
-                  color: '#ec4899',
-                  fontWeight: '600',
-                  fontSize: '0.85rem',
+                style={{
+                  textDecoration: "none",
+                  color: "#ec4899",
+                  fontWeight: "600",
+                  fontSize: "0.85rem",
                 }}
                 className="hover-grow"
               >
