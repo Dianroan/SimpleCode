@@ -22,6 +22,13 @@ export const getExercise = async (req, res) => {
       [id]
     );
 
+    // Generar código de ejemplo de pruebas para mostrar al usuario
+    const exampleTestsCode = generateExampleTestsCode(
+      exercise[0].code_template,
+      exercise[0].required_keywords,
+      tests
+    );
+
     res.json({
       id: exercise[0].id,
       title: exercise[0].title,
@@ -29,6 +36,7 @@ export const getExercise = async (req, res) => {
       code_template: exercise[0].code_template,
       required_keywords: exercise[0].required_keywords,
       total_tests: exercise[0].total_tests,
+      example_tests_code: exampleTestsCode,
       tests: tests.map(t => ({
         id: t.id,
         test_order: t.test_order,
@@ -42,6 +50,144 @@ export const getExercise = async (req, res) => {
     res.status(500).json({ error: "Error al obtener el ejercicio" });
   }
 };
+
+// Función auxiliar para generar código de ejemplo de las pruebas
+function generateExampleTestsCode(codeTemplate, requiredKeywords, tests) {
+  const keywords = requiredKeywords?.split(",").map(k => k.trim()) || [];
+  let functionName = keywords.length > 0 ? keywords[0] : null;
+  let functionReturnType = null;
+
+  // Validar si el nombre de función es válido
+  const primitiveTypes = ["int", "long", "double", "float", "string", "bool", "void"];
+  const controlKeywords = ["if", "for", "while", "foreach", "switch", "return", "break", "continue", "public", "private", "class"];
+  const isValidIdentifier = (s) => /^[A-Za-z_]\w*$/.test(s || "");
+
+  if (functionName) {
+    const fnLower = functionName.toLowerCase();
+    if (primitiveTypes.includes(fnLower) || controlKeywords.includes(fnLower) || !isValidIdentifier(functionName)) {
+      functionName = null;
+    }
+  }
+
+  // Extraer nombre de función del template si no se encontró
+  if (!functionName && typeof codeTemplate === "string") {
+    const fnMatch = codeTemplate.match(/public\s+static\s+(\w+)\s+(\w+)\s*\(/i);
+    if (fnMatch && fnMatch[2]) {
+      functionReturnType = fnMatch[1];
+      functionName = fnMatch[2];
+    }
+  } else if (functionName && typeof codeTemplate === "string") {
+    const re = new RegExp(`public\\s+static\\s+(\\w+)\\s+${functionName}\\s*\\(`, 'i');
+    const m = codeTemplate.match(re);
+    if (m && m[1]) functionReturnType = m[1];
+  }
+
+  // Función para formatear argumentos
+  const formatArg = (arg) => {
+    if (arg === null) return "null";
+
+    if (Array.isArray(arg)) {
+      if (arg.length === 0) return "new int[] { }";
+
+      if (Array.isArray(arg[0])) {
+        const rows = arg.map(row => {
+          if (!Array.isArray(row)) return `{ ${formatArg(row)} }`;
+          const inner = row.map(v => {
+            if (typeof v === 'string') return formatArg(v);
+            if (typeof v === 'boolean') return v ? 'true' : 'false';
+            return String(v);
+          }).join(', ');
+          return `{ ${inner} }`;
+        }).join(', ');
+        return `new int[,] { ${rows} }`;
+      }
+
+      const items = arg.map(v => {
+        if (v === null) return 'null';
+        if (typeof v === 'string') return formatArg(v);
+        if (typeof v === 'boolean') return v ? 'true' : 'false';
+        return String(v);
+      }).join(', ');
+      return `new int[] { ${items} }`;
+    }
+
+    if (typeof arg === "string") {
+      if (/^-?\d+$/.test(arg)) {
+        const absDigits = arg.replace(/^[-+]/, "");
+        if (absDigits.length > 10) {
+          return arg + "L";
+        }
+        return arg;
+      }
+      return JSON.stringify(arg);
+    }
+
+    if (typeof arg === "boolean") return arg ? "true" : "false";
+
+    return String(arg);
+  };
+
+  // Generar las llamadas de prueba
+  let mainCode = "public static void Main(string[] args)\n{\n";
+  
+  for (const test of tests) {
+    let testCall = "";
+    if (test.input_data) {
+      try {
+        const inputs = JSON.parse(test.input_data);
+        if (Array.isArray(inputs)) {
+          const argList = inputs.map(i => formatArg(i)).join(", ");
+          if (functionName) {
+            if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+              testCall = `    ${functionName}(${argList});`;
+            } else {
+              testCall = `    Console.WriteLine(${functionName}(${argList}));`;
+            }
+          } else {
+            testCall = inputs.map(i => `    Console.WriteLine(${formatArg(i)});`).join('\n');
+          }
+        } else {
+          const arg = formatArg(inputs);
+          if (functionName) {
+            if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+              testCall = `    ${functionName}(${arg});`;
+            } else {
+              testCall = `    Console.WriteLine(${functionName}(${arg}));`;
+            }
+          } else {
+            testCall = `    Console.WriteLine(${arg});`;
+          }
+        }
+      } catch (e) {
+        if (functionName) {
+          if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+            testCall = `    ${functionName}(${JSON.stringify(test.input_data)});`;
+          } else {
+            testCall = `    Console.WriteLine(${functionName}(${JSON.stringify(test.input_data)}));`;
+          }
+        } else {
+          testCall = `    Console.WriteLine(${JSON.stringify(test.input_data)});`;
+        }
+      }
+    } else {
+      if (functionName) {
+        if (functionReturnType && functionReturnType.toLowerCase() === 'void') {
+          testCall = `    ${functionName}();`;
+        } else {
+          testCall = `    Console.WriteLine(${functionName}());`;
+        }
+      } else {
+        testCall = `    Console.WriteLine();`;
+      }
+    }
+
+    mainCode += testCall + "\n";
+  }
+
+  mainCode += "}";
+  
+  return mainCode;
+}
 
 // POST /api/exercises/:id/validate - Validar código del usuario
 export const validateExercise = async (req, res) => {

@@ -160,7 +160,6 @@ export default function PracticaPage() {
         {/* RQF13: Columna izquierda - Descripción del problema */}
         <div className="practica-left">
           <div className="problem-section">
-            <h2>{exercise.title}</h2>
             <div
               className="problem-statement"
               dangerouslySetInnerHTML={{ __html: exercise.statement }}
@@ -210,7 +209,7 @@ export default function PracticaPage() {
         {/* RQF15: Columna derecha - Editor de código */}
         <div className="practica-right">
           <div className="editor-section">
-            <h3>Código C#</h3>
+            <h3>Tu Código C#</h3>
             <AceEditor
               mode="csharp"
               theme="github"
@@ -228,6 +227,36 @@ export default function PracticaPage() {
               style={{ width: "100%", height: "400px" }}
             />
           </div>
+
+          {/* Mostrar código de ejemplo de las pruebas */}
+          {exercise.example_tests_code && (
+            <div className="editor-section">
+              <h3>📋 Código de Pruebas (Referencia)</h3>
+              <p className="tests-info">
+                Estas son las llamadas que se harán a tu función. Solo es de
+                referencia visual.
+              </p>
+              <AceEditor
+                mode="csharp"
+                theme="github"
+                value={exercise.example_tests_code}
+                readOnly={true}
+                name="testsViewer"
+                editorProps={{ $blockScrolling: true }}
+                setOptions={{
+                  useWorker: false,
+                  fontSize: 13,
+                  fontFamily: "'Courier New', monospace",
+                  showLineNumbers: true,
+                  tabSize: 4,
+                  readOnly: true,
+                  highlightActiveLine: false,
+                  highlightGutterLine: false,
+                }}
+                style={{ width: "100%", height: "150px", opacity: 0.85 }}
+              />
+            </div>
+          )}
 
           {/* Botones de control */}
           <div className="button-group">
