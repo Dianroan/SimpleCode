@@ -79,12 +79,61 @@ export default function CodeBlockRenderer({ htmlContent }) {
               key={block.id}
               className="code-block-editor"
               style={{
-                border: "1px solid #e0e0e0",
-                borderRadius: "4px",
+                border: "2px solid #e5e7eb",
+                borderRadius: "1rem",
                 overflow: "hidden",
-                margin: "12px 0",
+                margin: "1.5rem 0",
+                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.08)",
+                transition: "all 0.3s ease",
               }}
             >
+              <div
+                style={{
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  padding: "0.5rem 1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                }}
+              >
+                <div style={{ display: "flex", gap: "0.375rem" }}>
+                  <div
+                    style={{
+                      width: "12px",
+                      height: "12px",
+                      borderRadius: "50%",
+                      background: "#ff5f56",
+                    }}
+                  />
+                  <div
+                    style={{
+                      width: "12px",
+                      height: "12px",
+                      borderRadius: "50%",
+                      background: "#ffbd2e",
+                    }}
+                  />
+                  <div
+                    style={{
+                      width: "12px",
+                      height: "12px",
+                      borderRadius: "50%",
+                      background: "#27c93f",
+                    }}
+                  />
+                </div>
+                <span
+                  style={{
+                    color: "white",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                    marginLeft: "0.5rem",
+                  }}
+                >
+                  C#
+                </span>
+              </div>
               <AceEditor
                 mode="csharp"
                 theme="github"
@@ -95,7 +144,7 @@ export default function CodeBlockRenderer({ htmlContent }) {
                 readOnly={true}
                 setOptions={{
                   useWorker: false,
-                  fontSize: 13,
+                  fontSize: 14,
                   showLineNumbers: true,
                   maxLines: Infinity,
                 }}

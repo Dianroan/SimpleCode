@@ -9,10 +9,12 @@ import {
 import StepDot from "./StepDot.jsx";
 import StepCard from "./StepCard.jsx";
 import WeaknessCharts from "@modules/core/components/WeaknessCharts.jsx";
+import { useAuth } from "@context/AuthContext.jsx";
 
 export default function RutaPath() {
   const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
+  const { user } = useAuth();
 
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +93,9 @@ export default function RutaPath() {
 
   // Determinar si un paso está disponible
   const isStepAvailable = (step, index) => {
+    // Si el usuario es admin, todos los pasos están disponibles
+    if (user?.role === "admin") return true;
+
     // Si está completado, siempre disponible
     if (step.status === "COMPLETED") return true;
 

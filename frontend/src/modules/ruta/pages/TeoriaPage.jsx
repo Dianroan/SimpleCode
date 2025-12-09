@@ -117,100 +117,303 @@ export default function TeoriaPage() {
   };
 
   return (
-    <main className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <Button variant="outline-secondary" onClick={handleBack}>
+    <main className="container py-4 animate-fade-in">
+      {/* Header con botón de volver */}
+      <div className="mb-4">
+        <button
+          onClick={handleBack}
+          className="btn hover-lift"
+          style={{
+            background: "white",
+            border: "2px solid #e5e7eb",
+            borderRadius: "0.75rem",
+            padding: "0.5rem 1.25rem",
+            fontWeight: "600",
+            color: "#4b5563",
+            transition: "all 0.25s ease",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "#667eea";
+            e.currentTarget.style.color = "#667eea";
+            e.currentTarget.style.boxShadow =
+              "0 4px 12px rgba(102, 126, 234, 0.2)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "#e5e7eb";
+            e.currentTarget.style.color = "#4b5563";
+            e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.05)";
+          }}
+        >
           ← Volver a la ruta
-        </Button>
+        </button>
       </div>
 
-      {loading && <p>Cargando teoría...</p>}
+      {loading && (
+        <div className="text-center py-5">
+          <div
+            className="spinner mx-auto mb-3"
+            style={{ width: "40px", height: "40px", borderWidth: "4px" }}
+          />
+          <p className="text-muted">Cargando teoría...</p>
+        </div>
+      )}
 
       {error && (
-        <div className="alert alert-danger" role="alert">
+        <div
+          className="alert"
+          role="alert"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1))",
+            border: "none",
+            borderLeft: "4px solid #ef4444",
+            borderRadius: "1rem",
+            color: "#dc2626",
+            padding: "1.25rem",
+          }}
+        >
           {error}
         </div>
       )}
 
       {!loading && !error && !activity && (
-        <p>No se encontró la actividad de teoría.</p>
+        <div
+          className="text-center py-5"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(156, 163, 175, 0.1), rgba(209, 213, 219, 0.1))",
+            borderRadius: "1rem",
+            padding: "3rem",
+          }}
+        >
+          <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📚</div>
+          <p className="text-muted mb-0">
+            No se encontró la actividad de teoría.
+          </p>
+        </div>
       )}
 
       {!loading && !error && activity && (
         <>
-          <h1 className="h3 mb-3">{activity.title}</h1>
+          {/* Título de la lección */}
+          <div className="mb-4">
+            <div className="d-flex align-items-center gap-3 mb-2">
+              <div
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "12px",
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.5rem",
+                  boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+                }}
+              >
+                📖
+              </div>
+              <h1
+                className="fw-bold mb-0"
+                style={{
+                  fontSize: "2rem",
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                {activity.title}
+              </h1>
+            </div>
+            <div
+              style={{
+                height: "4px",
+                width: "80px",
+                background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+                borderRadius: "2px",
+                marginTop: "0.5rem",
+              }}
+            />
+          </div>
 
-          <Card className="p-3">
-            {/* Renderizamos el HTML que viene de la BD con soporte para code blocks */}
-            <CodeBlockRenderer htmlContent={activity.content} />
-          </Card>
+          {/* Contenido de la lección */}
+          <div
+            className="card hover-lift mb-4"
+            style={{
+              borderRadius: "1.5rem",
+              border: "none",
+              background: "white",
+              padding: "2.5rem",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+              borderLeft: "5px solid #667eea",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "1.05rem",
+                lineHeight: "1.8",
+                color: "#1f2937",
+              }}
+            >
+              {/* Renderizamos el HTML que viene de la BD con soporte para code blocks */}
+              <CodeBlockRenderer htmlContent={activity.content} />
+            </div>
+          </div>
 
           {/* 🔹 Ejemplo interactivo SOLO para la lección 4 */}
           {Number(activity.id) === 4 && (
             <section className="mt-4">
-              <h2 className="h5 mb-3">
-                Ejemplo interactivo de Console.Write y Console.WriteLine
-              </h2>
-
-              <p className="mb-2">
-                El siguiente código está escrito en C#. Puedes ejecutarlo para
-                ver exactamente qué imprime en la consola.
-              </p>
-
-              <AceEditor
-                mode="csharp"
-                theme="github"
-                name="consoleWriteExample"
-                value={CONSOLE_WRITE_EXAMPLE}
-                width="100%"
-                height="220px"
-                readOnly={true}
-                setOptions={{
-                  useWorker: false,
+              <div
+                className="card hover-lift"
+                style={{
+                  borderRadius: "1.5rem",
+                  border: "none",
+                  background:
+                    "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(34, 211, 238, 0.05) 100%)",
+                  padding: "2rem",
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+                  borderLeft: "5px solid #10b981",
                 }}
-                editorProps={{ $blockScrolling: true }}
-              />
+              >
+                <div className="d-flex align-items-center gap-2 mb-3">
+                  <span style={{ fontSize: "1.5rem" }}>💻</span>
+                  <h2 className="h5 fw-bold mb-0" style={{ color: "#10b981" }}>
+                    Ejemplo Interactivo
+                  </h2>
+                </div>
 
-              <div className="mt-3 d-flex gap-2 align-items-center">
-                <Button
-                  variant="primary"
-                  onClick={handleRunExample}
-                  disabled={exampleLoading}
+                <p className="mb-3 text-muted">
+                  El siguiente código está escrito en C#. Puedes ejecutarlo para
+                  ver exactamente qué imprime en la consola.
+                </p>
+
+                <div
+                  style={{
+                    borderRadius: "1rem",
+                    overflow: "hidden",
+                    border: "2px solid #e5e7eb",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                  }}
                 >
-                  {exampleLoading ? "Ejecutando..." : "Ejecutar ejemplo"}
-                </Button>
-              </div>
+                  <AceEditor
+                    mode="csharp"
+                    theme="github"
+                    name="consoleWriteExample"
+                    value={CONSOLE_WRITE_EXAMPLE}
+                    width="100%"
+                    height="220px"
+                    readOnly={true}
+                    setOptions={{
+                      useWorker: false,
+                    }}
+                    editorProps={{ $blockScrolling: true }}
+                  />
+                </div>
 
-              <div className="mt-3">
-                <h3 className="h6">Salida de la consola</h3>
-                <Card className="p-2">
-                  {exampleError && (
-                    <p
-                      className="text-danger mb-2"
-                      style={{ whiteSpace: "pre-wrap" }}
-                    >
-                      {exampleError}
-                    </p>
-                  )}
-                  <pre
+                <div className="mt-3">
+                  <button
+                    onClick={handleRunExample}
+                    disabled={exampleLoading}
+                    className="btn"
                     style={{
-                      margin: 0,
-                      whiteSpace: "pre-wrap",
-                      fontFamily: "monospace",
-                      minHeight: "2em",
+                      background: exampleLoading
+                        ? "#9ca3af"
+                        : "linear-gradient(135deg, #10b981 0%, #22d3ee 100%)",
+                      color: "white",
+                      fontWeight: "600",
+                      borderRadius: "0.75rem",
+                      padding: "0.75rem 1.5rem",
+                      border: "none",
+                      boxShadow: exampleLoading
+                        ? "none"
+                        : "0 4px 12px rgba(16, 185, 129, 0.3)",
+                      cursor: exampleLoading ? "not-allowed" : "pointer",
+                      transition: "all 0.25s ease",
                     }}
                   >
-                    {exampleOutput}
-                  </pre>
-                </Card>
+                    {exampleLoading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        Ejecutando...
+                      </>
+                    ) : (
+                      <>▶️ Ejecutar ejemplo</>
+                    )}
+                  </button>
+                </div>
+
+                <div className="mt-3">
+                  <div className="d-flex align-items-center gap-2 mb-2">
+                    <span style={{ fontSize: "1.1rem" }}>🖥️</span>
+                    <h3
+                      className="h6 fw-bold mb-0"
+                      style={{ color: "#4b5563" }}
+                    >
+                      Salida de la consola
+                    </h3>
+                  </div>
+                  <div
+                    style={{
+                      background: "#1f2937",
+                      borderRadius: "0.75rem",
+                      padding: "1.25rem",
+                      boxShadow: "inset 0 2px 8px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
+                    {exampleError && (
+                      <p
+                        className="mb-2"
+                        style={{
+                          whiteSpace: "pre-wrap",
+                          color: "#fca5a5",
+                          fontFamily: "monospace",
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        ❌ {exampleError}
+                      </p>
+                    )}
+                    <pre
+                      style={{
+                        margin: 0,
+                        whiteSpace: "pre-wrap",
+                        fontFamily: "monospace",
+                        minHeight: "2em",
+                        color: "#22d3ee",
+                        fontSize: "0.9rem",
+                        lineHeight: "1.6",
+                      }}
+                    >
+                      {exampleOutput || "// La salida aparecerá aquí..."}
+                    </pre>
+                  </div>
+                </div>
               </div>
             </section>
           )}
 
+          {/* Botón de continuar */}
           <div className="mt-4 d-flex justify-content-end">
-            <Button variant="primary" onClick={handleContinue}>
-              Continuar
-            </Button>
+            <button
+              onClick={handleContinue}
+              className="btn hover-lift"
+              style={{
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                color: "white",
+                fontWeight: "600",
+                borderRadius: "0.75rem",
+                padding: "0.75rem 2rem",
+                border: "none",
+                boxShadow: "0 4px 12px rgba(102, 126, 234, 0.3)",
+                fontSize: "1rem",
+              }}
+            >
+              Continuar →
+            </button>
           </div>
         </>
       )}
