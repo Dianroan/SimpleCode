@@ -8,7 +8,7 @@ export default function RegisterForm({ onSubmit }) {
     useRegisterForm({ onSubmit });
 
   return (
-    <Card title="Crear cuenta" className="h-100">
+    <div>
       <form noValidate onSubmit={handleSubmit}>
         <TextField
           id="reg-username"
@@ -47,13 +47,19 @@ export default function RegisterForm({ onSubmit }) {
         />
         <Button
           type="submit"
-          variant="success"
           className="w-100"
           disabled={submitting}
+          gradient
+          style={{
+            marginTop: "0.5rem",
+            padding: "0.75rem",
+            fontSize: "1.05rem",
+            background: "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
+          }}
         >
-          {submitting ? "Creando..." : "Crear cuenta"}
+          {submitting ? "Creando..." : "🚀 Crear cuenta"}
         </Button>
       </form>
-    </Card>
+    </div>
   );
 }

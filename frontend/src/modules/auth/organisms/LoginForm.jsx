@@ -9,7 +9,7 @@ export default function LoginForm({ onSubmit }) {
   );
 
   return (
-    <Card title="Iniciar sesión" className="h-100">
+    <div>
       <form noValidate onSubmit={handleSubmit}>
         <TextField
           id="login-username"
@@ -28,10 +28,20 @@ export default function LoginForm({ onSubmit }) {
           placeholder="••••••••"
           error={errors.password}
         />
-        <Button type="submit" className="w-100" disabled={submitting}>
-          {submitting ? "Entrando..." : "Entrar"}
+        <Button
+          type="submit"
+          className="w-100"
+          disabled={submitting}
+          gradient
+          style={{
+            marginTop: "0.5rem",
+            padding: "0.75rem",
+            fontSize: "1.05rem",
+          }}
+        >
+          {submitting ? "Entrando..." : "🔑 Entrar"}
         </Button>
       </form>
-    </Card>
+    </div>
   );
 }

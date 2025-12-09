@@ -120,20 +120,67 @@ export default function RutaPath() {
   };
 
   return (
-    <div className="container py-4">
-      <h1 className="mb-3">Ruta de aprendizaje</h1>
+    <div className="container py-4 animate-fade-in">
+      <div className="mb-4">
+        <h1 className="fw-bold mb-2" style={{ fontSize: "2.5rem" }}>
+          <span style={{ marginRight: "0.5rem" }}>🎯</span>
+          <span
+            style={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Ruta de aprendizaje
+          </span>
+        </h1>
+        <p className="text-muted">
+          Sigue tu camino hacia el dominio de C# y POO
+        </p>
+      </div>
+
       <div className="row">
         <div className="col-lg-8">
           {error && (
-            <div className="alert alert-danger" role="alert">
+            <div
+              className="alert"
+              role="alert"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1))",
+                border: "none",
+                borderLeft: "4px solid #ef4444",
+                borderRadius: "1rem",
+                color: "#dc2626",
+              }}
+            >
               {error}
             </div>
           )}
 
-          {loading && <p>Cargando ruta...</p>}
+          {loading && (
+            <div className="text-center py-5">
+              <div className="spinner mx-auto mb-3" />
+              <p className="text-muted">Cargando tu ruta de aprendizaje...</p>
+            </div>
+          )}
 
           {!loading && !error && steps.length === 0 && (
-            <p>No hay actividades configuradas en la ruta todavía.</p>
+            <div
+              className="text-center py-5"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(118, 75, 162, 0.05))",
+                borderRadius: "1rem",
+                padding: "3rem",
+              }}
+            >
+              <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📚</div>
+              <p className="text-muted">
+                No hay actividades configuradas en la ruta todavía.
+              </p>
+            </div>
           )}
 
           {!loading && !error && steps.length > 0 && (
@@ -178,22 +225,29 @@ export default function RutaPath() {
                     {index > 0 && (
                       <div
                         style={{
-                          width: "4px",
+                          width: "5px",
                           height: "40px",
-                          backgroundColor:
-                            isCompleted || isAvailable ? "#28a745" : "#dee2e6",
-                          marginBottom: "8px",
-                          borderRadius: "2px",
+                          background:
+                            isCompleted || isAvailable
+                              ? "linear-gradient(180deg, #10b981 0%, #22d3ee 100%)"
+                              : "#e5e7eb",
+                          marginBottom: "12px",
+                          borderRadius: "3px",
+                          boxShadow:
+                            isCompleted || isAvailable
+                              ? "0 2px 8px rgba(16, 185, 129, 0.3)"
+                              : "none",
                         }}
                       />
                     )}
 
                     <div
-                      className="d-flex align-items-center gap-3 w-100"
+                      className="d-flex align-items-center gap-3 w-100 hover-lift"
                       style={{
                         cursor: isAvailable ? "pointer" : "not-allowed",
-                        opacity: isAvailable ? 1 : 0.5,
-                        filter: isAvailable ? "none" : "grayscale(100%)",
+                        opacity: isAvailable ? 1 : 0.6,
+                        filter: isAvailable ? "none" : "grayscale(50%)",
+                        transition: "all 0.25s ease",
                       }}
                       onClick={() => goTo(step, index)}
                     >
@@ -222,77 +276,155 @@ export default function RutaPath() {
         </div>
 
         <div className="col-lg-4">
-          <div className="card p-3 mb-3">
-            <h5>Progreso del curso</h5>
-            {progressLoading && <p>Cargando progreso...</p>}
+          <div 
+            className="card hover-lift mb-3" 
+            style={{
+              borderRadius: '1.5rem',
+              border: 'none',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(34, 211, 238, 0.05) 100%)',
+              borderLeft: '5px solid #10b981',
+              padding: '1.5rem',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+            }}
+          >
+            <div className="d-flex align-items-center gap-2 mb-3">
+              <span style={{ fontSize: '1.5rem' }}>📈</span>
+              <h5 className="fw-bold mb-0" style={{ color: '#10b981' }}>
+                Progreso del Curso
+              </h5>
+            </div>
+
+            {progressLoading && (
+              <div className="text-center py-3">
+                <div className="spinner mx-auto" style={{ width: '30px', height: '30px', borderWidth: '3px' }} />
+              </div>
+            )}
+
             {!progressLoading && progress && (
               <>
-                <div className="mb-2">
-                  <div className="progress" style={{ height: 22 }}>
+                <div className="mb-3">
+                  <div 
+                    className="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span className="text-muted small">Completado</span>
+                    <span className="fw-bold" style={{ fontSize: '1.25rem', color: '#10b981' }}>
+                      {progress.percentage}%
+                    </span>
+                  </div>
+                  <div 
+                    className="progress" 
+                    style={{ 
+                      height: '12px',
+                      borderRadius: '50px',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                    }}
+                  >
                     <div
                       className="progress-bar"
                       role="progressbar"
-                      style={{ width: `${progress.percentage}%` }}
+                      style={{ 
+                        width: `${progress.percentage}%`,
+                        background: 'linear-gradient(90deg, #10b981 0%, #22d3ee 100%)',
+                        borderRadius: '50px',
+                        transition: 'width 1s ease',
+                      }}
                       aria-valuenow={progress.percentage}
                       aria-valuemin="0"
                       aria-valuemax="100"
-                    >
-                      {progress.percentage}%
-                    </div>
+                    />
                   </div>
                 </div>
-                <p className="mb-2 text-muted">
-                  {progress.completed} de {progress.total} actividades
-                  completadas
-                </p>
+
+                <div className="mb-3 text-center p-3" style={{ background: 'rgba(16, 185, 129, 0.1)', borderRadius: '0.75rem' }}>
+                  <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#10b981' }}>
+                    {progress.completed} <span style={{ fontSize: '1rem', color: '#6b7280' }}>/ {progress.total}</span>
+                  </div>
+                  <div className="small text-muted">actividades completadas</div>
+                </div>
 
                 {progress.nextActivity ? (
                   <div>
-                    <p className="mb-1">
-                      <strong>Siguiente actividad:</strong>
+                    <p className="small text-muted mb-2">SIGUIENTE ACTIVIDAD:</p>
+                    <p className="fw-semibold mb-3" style={{ color: '#1f2937', fontSize: '0.9rem' }}>
+                      {progress.nextActivity.step_order}. {progress.nextActivity.title}
                     </p>
-                    <p className="mb-2">
-                      {progress.nextActivity.step_order}.{" "}
-                      {progress.nextActivity.title}
-                    </p>
-                    <div className="d-flex gap-2">
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() =>
-                          goTo(
-                            progress.nextActivity,
-                            steps.findIndex(
-                              (s) => s.id === progress.nextActivity.id
-                            )
+                    <button
+                      className="btn w-100"
+                      onClick={() =>
+                        goTo(
+                          progress.nextActivity,
+                          steps.findIndex(
+                            (s) => s.id === progress.nextActivity.id
                           )
-                        }
-                      >
-                        Ir a la siguiente lección
-                      </button>
-                    </div>
+                        )
+                      }
+                      style={{
+                        background: 'linear-gradient(135deg, #10b981 0%, #22d3ee 100%)',
+                        color: 'white',
+                        fontWeight: '600',
+                        borderRadius: '0.75rem',
+                        padding: '0.75rem',
+                        border: 'none',
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                        transition: 'all 0.25s ease',
+                      }}
+                    >
+                      🚀 Continuar
+                    </button>
                   </div>
                 ) : (
-                  <p className="text-success">
-                    ¡Has completado todas las actividades!
-                  </p>
+                  <div 
+                    className="text-center p-3" 
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 211, 238, 0.1))',
+                      borderRadius: '0.75rem',
+                    }}
+                  >
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
+                    <p className="fw-semibold mb-0" style={{ color: '#10b981' }}>
+                      ¡Completaste todo!
+                    </p>
+                  </div>
                 )}
               </>
             )}
             {!progressLoading && !progress && (
-              <p>No se pudo cargar el progreso.</p>
+              <p className="text-muted text-center">No se pudo cargar el progreso.</p>
             )}
           </div>
 
           {/* Sección de debilidades */}
-          <div className="card p-3">
-            <h5 className="mb-3">
+          <div 
+            className="card hover-lift" 
+            style={{
+              borderRadius: '1.5rem',
+              border: 'none',
+              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+              borderLeft: '5px solid #ec4899',
+              padding: '1.5rem',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+            }}
+          >
+            <div className="d-flex align-items-center justify-content-between mb-3">
+              <div className="d-flex align-items-center gap-2">
+                <span style={{ fontSize: '1.5rem' }}>📊</span>
+                <h5 className="fw-bold mb-0" style={{ color: '#ec4899' }}>
+                  Debilidades
+                </h5>
+              </div>
               <Link
                 to="/debilidades"
-                style={{ textDecoration: "none", color: "inherit" }}
+                style={{ 
+                  textDecoration: 'none',
+                  color: '#ec4899',
+                  fontWeight: '600',
+                  fontSize: '0.85rem',
+                }}
+                className="hover-grow"
               >
-                Debilidades
+                Ver más →
               </Link>
-            </h5>
+            </div>
             <WeaknessCharts />
           </div>
         </div>

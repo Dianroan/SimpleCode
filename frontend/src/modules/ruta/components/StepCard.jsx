@@ -8,46 +8,93 @@ export default function StepCard({
   isNext,
   stepOrder,
 }) {
-  // Determinar el borde basado en el estado
-  let borderStyle = "2px solid #dee2e6";
+  // Determinar estilos basados en el estado con colores vibrantes
+  let borderStyle = "2px solid #e5e7eb";
   let backgroundColor = "#fff";
+  let borderLeftColor = "#e5e7eb";
+  let iconColor = "#9ca3af";
+  let badgeStyle = {};
 
   if (isCompleted) {
-    borderStyle = "2px solid #28a745";
-    backgroundColor = "#f8fff9";
+    borderStyle = "2px solid #10b981";
+    backgroundColor =
+      "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(52, 211, 153, 0.05) 100%)";
+    borderLeftColor = "#10b981";
+    iconColor = "#10b981";
   } else if (isNext) {
-    borderStyle = "2px solid #ffc107";
-    backgroundColor = "#fffbf0";
+    borderStyle = "2px solid #f59e0b";
+    backgroundColor =
+      "linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 191, 36, 0.08) 100%)";
+    borderLeftColor = "#f59e0b";
+    iconColor = "#f59e0b";
+    badgeStyle = {
+      background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+      color: "white",
+      padding: "0.375rem 0.875rem",
+      borderRadius: "50px",
+      fontWeight: "600",
+      fontSize: "0.75rem",
+      boxShadow: "0 4px 12px rgba(245, 158, 11, 0.4)",
+      animation: "pulse 2s infinite",
+    };
   } else if (isAvailable) {
-    borderStyle = "2px solid #28a745";
+    borderStyle = "2px solid #667eea";
+    borderLeftColor = "#667eea";
+    iconColor = "#667eea";
   }
+
+  const isTheory = kind === "theory";
 
   return (
     <Card
-      className="px-3 py-2"
+      className="px-3 py-3 hover-lift"
       style={{
         border: borderStyle,
-        backgroundColor,
-        transition: "all 0.3s ease",
+        background: backgroundColor,
+        borderLeft: `5px solid ${borderLeftColor}`,
+        transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+        borderRadius: "1rem",
       }}
     >
       <div className="d-flex justify-content-between align-items-center">
         <div className="flex-grow-1">
-          <div className="small text-muted">
-            Paso {stepOrder} · {kind === "theory" ? "Teoría" : "Práctica"}
+          <div className="d-flex align-items-center gap-2 mb-1">
+            <span style={{ fontSize: "1.25rem" }}>
+              {isTheory ? "📘" : "💻"}
+            </span>
+            <div
+              className="small"
+              style={{ color: iconColor, fontWeight: "600" }}
+            >
+              Paso {stepOrder} · {kind === "theory" ? "Teoría" : "Práctica"}
+            </div>
           </div>
-          <div className="fw-semibold">{title}</div>
+          <div
+            className="fw-semibold"
+            style={{ fontSize: "1rem", color: "#1f2937" }}
+          >
+            {title}
+          </div>
         </div>
         {isCompleted && (
-          <div className="text-success ms-2" style={{ fontSize: "20px" }}>
+          <div
+            className="ms-3"
+            style={{
+              fontSize: "24px",
+              color: "#10b981",
+              filter: "drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))",
+            }}
+          >
             ✓
           </div>
         )}
         {isNext && !isCompleted && (
-          <div className="badge bg-warning text-dark ms-2">Siguiente</div>
+          <div className="ms-3" style={badgeStyle}>
+            🚀 Siguiente
+          </div>
         )}
         {!isAvailable && (
-          <div className="text-muted ms-2" style={{ fontSize: "20px" }}>
+          <div className="ms-3" style={{ fontSize: "24px", opacity: 0.5 }}>
             🔒
           </div>
         )}

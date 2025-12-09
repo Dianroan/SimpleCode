@@ -53,23 +53,62 @@ export default function WeaknessChartsHorizontal() {
           {
             label: "Puntos Débiles",
             data: values,
-            borderColor: "rgba(255,99,132,1)",
-            backgroundColor: "rgba(255,99,132,0.2)",
-            pointBackgroundColor: "rgba(255,99,132,1)",
+            borderColor: "#ec4899",
+            backgroundColor: "rgba(236, 72, 153, 0.15)",
+            pointBackgroundColor: "#ec4899",
             pointBorderColor: "#fff",
             pointHoverBackgroundColor: "#fff",
-            pointHoverBorderColor: "rgba(255,99,132,1)",
+            pointHoverBorderColor: "#ec4899",
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            borderWidth: 3,
           },
         ],
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, position: "top" },
+          legend: {
+            display: true,
+            position: "top",
+            labels: {
+              color: '#1f2937',
+              font: {
+                size: 13,
+                weight: '600',
+              },
+              padding: 15,
+            },
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            padding: 12,
+            cornerRadius: 8,
+            titleFont: { size: 14, weight: 'bold' },
+            bodyFont: { size: 13 },
+          },
         },
         scales: {
           r: {
             beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.06)',
+            },
+            angleLines: {
+              color: 'rgba(0, 0, 0, 0.1)',
+            },
+            pointLabels: {
+              color: '#4b5563',
+              font: {
+                size: 11,
+                weight: '600',
+              },
+            },
+            ticks: {
+              color: '#9ca3af',
+              backdropColor: 'transparent',
+            },
           },
         },
       },
@@ -92,6 +131,17 @@ export default function WeaknessChartsHorizontal() {
     const labels = data.map((d) => d.name);
     const values = data.map((d) => d.value);
 
+    const colors = [
+      '#ec4899', // pink
+      '#8b5cf6', // purple
+      '#3b82f6', // blue
+      '#10b981', // green
+      '#f59e0b', // orange
+      '#ef4444', // red
+      '#06b6d4', // cyan
+      '#6366f1', // indigo
+    ];
+
     const ctx = canvasRef.current.getContext("2d");
     chartRef.current = new Chart(ctx, {
       type: "bar",
@@ -99,21 +149,55 @@ export default function WeaknessChartsHorizontal() {
         labels,
         datasets: [
           {
-            label: "Puntaje de debilidad",
+            label: "Fallos",
             data: values,
-            backgroundColor: "rgba(255,99,132,0.6)",
-            borderColor: "rgba(255,99,132,1)",
-            borderWidth: 1,
+            backgroundColor: values.map((_, i) => colors[i % colors.length]),
+            borderColor: values.map((_, i) => colors[i % colors.length]),
+            borderWidth: 2,
+            borderRadius: 8,
+            barThickness: 35,
           },
         ],
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            padding: 12,
+            cornerRadius: 8,
+            titleFont: { size: 14, weight: 'bold' },
+            bodyFont: { size: 13 },
+            callbacks: {
+              label: function(context) {
+                return `Fallos: ${context.parsed.y}`;
+              }
+            },
+          },
         },
         scales: {
-          y: { beginAtZero: true },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)',
+              drawBorder: false,
+            },
+            ticks: {
+              color: '#6b7280',
+              font: { size: 11, weight: '600' },
+            },
+          },
+          x: {
+            grid: {
+              display: false,
+            },
+            ticks: {
+              color: '#4b5563',
+              font: { size: 11, weight: '600' },
+            },
+          },
         },
       },
     });
@@ -123,34 +207,69 @@ export default function WeaknessChartsHorizontal() {
     };
   }, [data]);
 
-  if (loading) return <div>Cargando debilidades...</div>;
+  if (loading) return (
+    <div className="text-center py-4">
+      <div className="spinner mx-auto mb-2" style={{ width: '30px', height: '30px', borderWidth: '3px' }} />
+      <p className="text-muted small mb-0">Cargando debilidades...</p>
+    </div>
+  );
 
   if (data.length === 0)
     return (
-      <div>
-        No hay datos de debilidades aún. Realiza más ejercicios para obtener un
-        análisis.
+      <div 
+        className="text-center py-4" 
+        style={{
+          background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(139, 92, 246, 0.05))',
+          borderRadius: '1rem',
+          padding: '2rem',
+        }}
+      >
+        <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📊</div>
+        <p className="text-muted mb-0">
+          No hay datos de debilidades aún.<br/>
+          Realiza más ejercicios para obtener un análisis.
+        </p>
       </div>
     );
 
   return (
-    <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px" }}
-    >
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
       {/* Gráfica de radar */}
       <div>
-        <h6 style={{ marginBottom: "15px", textAlign: "center" }}>
-          Puntos Débiles
-        </h6>
-        <canvas ref={radarCanvasRef} />
+        <div 
+          className="d-flex align-items-center gap-2 mb-3"
+          style={{
+            paddingBottom: '0.75rem',
+            borderBottom: '2px solid rgba(236, 72, 153, 0.2)',
+          }}
+        >
+          <span style={{ fontSize: '1.25rem' }}>🎯</span>
+          <h6 className="mb-0 fw-bold" style={{ color: '#ec4899' }}>
+            Puntos Débiles
+          </h6>
+        </div>
+        <div style={{ height: '280px' }}>
+          <canvas ref={radarCanvasRef} />
+        </div>
       </div>
 
       {/* Gráfica de barras */}
       <div>
-        <h6 style={{ marginBottom: "15px", textAlign: "center" }}>
-          Análisis detallado
-        </h6>
-        <canvas ref={canvasRef} />
+        <div 
+          className="d-flex align-items-center gap-2 mb-3"
+          style={{
+            paddingBottom: '0.75rem',
+            borderBottom: '2px solid rgba(139, 92, 246, 0.2)',
+          }}
+        >
+          <span style={{ fontSize: '1.25rem' }}>📊</span>
+          <h6 className="mb-0 fw-bold" style={{ color: '#8b5cf6' }}>
+            Análisis Detallado
+          </h6>
+        </div>
+        <div style={{ height: '280px' }}>
+          <canvas ref={canvasRef} />
+        </div>
       </div>
     </div>
   );
