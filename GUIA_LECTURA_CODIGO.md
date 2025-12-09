@@ -9,7 +9,7 @@ Esta guía te ayudará a entender el proyecto SimpleCode de manera ordenada y l�
 ### **FASE 1: Entender la Estructura General (2 archivos)**
 
 1. **`README.md`** - Visión general del proyecto
-2. **`DOCUMENTACION.md`** - Guía de la funcionalidad principal
+2. **`DOCUMENTACION.md`** - Documentacion del proyecto en funcionalidad
 
 ---
 
