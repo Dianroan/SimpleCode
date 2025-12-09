@@ -297,7 +297,7 @@ npm test
 ## 📚 Documentación Adicional
 
 - **[GUIA_LECTURA_CODIGO.md](./GUIA_LECTURA_CODIGO.md)** - Orden recomendado para leer el código
-- **[PRACTICA_PAGE_GUIDE.md](./PRACTICA_PAGE_GUIDE.md)** - Guía técnica del sistema de ejercicios
+- **[DOCUMENTACION.md](./DOCUMENTACION.md)** - Guía técnica del sistema de ejercicios
 
 ---
 
