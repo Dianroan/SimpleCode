@@ -3,6 +3,7 @@ import Chart from "chart.js/auto";
 import {
   getTopWeaknessesApi,
   getWeaknessesByCategoryApi,
+  getFailedExercisesApi,
 } from "@services/api/weaknesses";
 
 export default function DebilidadesPage() {
@@ -14,19 +15,22 @@ export default function DebilidadesPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
+  const [failedExercises, setFailedExercises] = useState([]);
 
   useEffect(() => {
     let mounted = true;
     async function load() {
       try {
         setLoading(true);
-        const [topWeaknesses, categories] = await Promise.all([
+        const [topWeaknesses, categories, exercises] = await Promise.all([
           getTopWeaknessesApi(),
           getWeaknessesByCategoryApi(),
+          getFailedExercisesApi(),
         ]);
         if (!mounted) return;
         setData(topWeaknesses || []);
         setCategoryData(categories || []);
+        setFailedExercises(exercises || []);
       } catch (e) {
         console.error(e);
       } finally {
@@ -168,8 +172,8 @@ export default function DebilidadesPage() {
             </div>
           </div>
 
-          {/* Sección de tipos de programas con debilidades */}
-          {categoryData.length > 0 && (
+          {/* Sección de ejercicios fallidos */}
+          {failedExercises.length > 0 && (
             <div style={{ marginTop: "40px" }}>
               <h5 style={{ marginBottom: "20px" }}>
                 Fallastes en los siguientes tipos de programas
@@ -181,9 +185,9 @@ export default function DebilidadesPage() {
                   gap: "15px",
                 }}
               >
-                {categoryData.map((category) => (
+                {failedExercises.map((exercise) => (
                   <div
-                    key={category.id}
+                    key={exercise.id}
                     style={{
                       padding: "15px",
                       border: "1px solid #ddd",
@@ -205,7 +209,7 @@ export default function DebilidadesPage() {
                           fontWeight: "600",
                         }}
                       >
-                        {category.title}
+                        {exercise.title}
                       </h6>
                       <span
                         style={{
@@ -217,7 +221,7 @@ export default function DebilidadesPage() {
                           fontWeight: "bold",
                         }}
                       >
-                        {category.total_weakness}
+                        {exercise.failure_count}
                       </span>
                     </div>
                   </div>

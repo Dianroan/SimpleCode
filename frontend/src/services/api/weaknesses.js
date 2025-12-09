@@ -8,6 +8,10 @@ export function getWeaknessesByCategoryApi() {
   return request("/weaknesses/by-category");
 }
 
+export function getFailedExercisesApi() {
+  return request("/weaknesses/failed-exercises");
+}
+
 export function recordAttemptApi(payload) {
   // payload: { exercise_id, success, first_try }
   return request("/weaknesses/record-attempt", { method: "POST", body: payload });

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 05, 2025 at 12:34 PM
+-- Generation Time: Dec 09, 2025 at 08:33 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -226,7 +226,8 @@ INSERT INTO `exercise_attempts` (`id`, `user_id`, `exercise_id`, `is_successful`
 (138, 6, 12, 1, 5, 5, '5\n3\n3\n0\n-3', '2025-12-05 05:28:28'),
 (139, 6, 14, 1, 5, 5, '4000000000\n9223372036854775805\n2000000000\n0\n0', '2025-12-05 05:28:51'),
 (140, 6, 16, 0, 3, 5, 'False\nFalse\nFalse\nFalse\nFalse', '2025-12-05 05:29:04'),
-(141, 6, 16, 1, 5, 5, 'True\nFalse\nTrue\nFalse\nFalse', '2025-12-05 05:29:13');
+(141, 6, 16, 1, 5, 5, 'True\nFalse\nTrue\nFalse\nFalse', '2025-12-05 05:29:13'),
+(142, 7, 9, 0, 2, 5, '0\n0\n0\n0\n0', '2025-12-09 01:25:21');
 
 -- --------------------------------------------------------
 
@@ -650,7 +651,15 @@ INSERT INTO `user_course_progress` (`id`, `user_id`, `course_id`, `status`, `las
 (66, 6, 13, 'COMPLETED', NULL, NULL),
 (67, 6, 14, 'COMPLETED', NULL, NULL),
 (68, 6, 15, 'COMPLETED', NULL, NULL),
-(69, 6, 16, 'COMPLETED', NULL, NULL);
+(69, 6, 16, 'COMPLETED', NULL, NULL),
+(70, 7, 1, 'COMPLETED', NULL, NULL),
+(71, 7, 2, 'COMPLETED', NULL, NULL),
+(72, 7, 3, 'COMPLETED', NULL, NULL),
+(73, 7, 4, 'COMPLETED', NULL, NULL),
+(74, 7, 5, 'COMPLETED', NULL, NULL),
+(75, 7, 6, 'COMPLETED', NULL, NULL),
+(76, 7, 7, 'COMPLETED', NULL, NULL),
+(77, 7, 8, 'COMPLETED', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -671,7 +680,8 @@ CREATE TABLE `user_streaks` (
 
 INSERT INTO `user_streaks` (`id`, `user_id`, `current_streak_days`, `last_activity_date`) VALUES
 (1, 5, 1, '2025-12-05'),
-(2, 6, 5, '2025-12-04');
+(2, 6, 5, '2025-12-04'),
+(3, 7, 1, '2025-12-09');
 
 -- --------------------------------------------------------
 
@@ -708,7 +718,10 @@ INSERT INTO `user_weaknesses` (`id`, `user_id`, `tag_id`, `value`) VALUES
 (46, 6, 19, 3),
 (61, 6, 28, 0),
 (62, 6, 4, 1),
-(63, 6, 7, 1);
+(63, 6, 7, 1),
+(64, 7, 5, 1),
+(65, 7, 6, 1),
+(66, 7, 19, 1);
 
 --
 -- Indexes for dumped tables
@@ -813,7 +826,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `exercise_attempts`
 --
 ALTER TABLE `exercise_attempts`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=142;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=143;
 
 --
 -- AUTO_INCREMENT for table `exercise_tests`
@@ -843,19 +856,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_course_progress`
 --
 ALTER TABLE `user_course_progress`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `user_streaks`
 --
 ALTER TABLE `user_streaks`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `user_weaknesses`
 --
 ALTER TABLE `user_weaknesses`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- Constraints for dumped tables

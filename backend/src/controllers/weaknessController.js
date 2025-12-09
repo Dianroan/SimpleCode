@@ -152,3 +152,31 @@ export const getWeaknessesByCategory = async (req, res) => {
     res.status(500).json({ error: "Error al obtener debilidades por categoría" });
   }
 };
+
+// GET /api/weaknesses/failed-exercises
+// Retorna los ejercicios específicos que el usuario ha fallado con su contador
+export const getFailedExercises = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Autenticación requerida" });
+
+    const [exercises] = await pool.query(
+      `SELECT 
+        ea.id,
+        ea.title,
+        efc.failure_count,
+        efc.last_attempt_at
+       FROM exercise_failure_count efc
+       JOIN exercise_activities ea ON ea.id = efc.exercise_id
+       WHERE efc.user_id = ? AND efc.failure_count > 0
+       ORDER BY efc.failure_count DESC, efc.last_attempt_at DESC
+       LIMIT 20`,
+      [userId]
+    );
+
+    res.json(exercises);
+  } catch (error) {
+    console.error("getFailedExercises error:", error);
+    res.status(500).json({ error: "Error al obtener ejercicios fallidos" });
+  }
+};
