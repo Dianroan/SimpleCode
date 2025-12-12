@@ -85,6 +85,19 @@ export default function PracticaPage() {
       // RQF17: Llamar a JDoodle via backend
       const result = await validateExerciseApi(id, code);
 
+      // Detectar si el código no fue modificado
+      const isUnmodifiedCode =
+        result.output && result.output.includes("Código sin modificar");
+
+      if (isUnmodifiedCode) {
+        // Mostrar alert cuando el código no fue modificado
+        alert(
+          "⚠️ Código sin modificar\n\n" +
+            "Por favor, implementa la solución antes de ejecutar las pruebas.\n\n" +
+            `Resultado: 0/${result.total_tests} pruebas pasadas`
+        );
+      }
+
       // RQF19: Mostrar resultado
       if (result.is_successful) {
         setTestResult({

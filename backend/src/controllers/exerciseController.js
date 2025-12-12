@@ -13,6 +13,34 @@ import { pool } from "../db/pool.js";
 import axios from "axios";
 
 /**
+ * Normaliza código C# para comparación
+ * Elimina:
+ * - Espacios en blanco múltiples
+ * - Saltos de línea
+ * - Comentarios de una línea (//)
+ * - Comentarios de múltiples líneas
+ * 
+ * Esto permite detectar si el usuario no ha modificado el código base
+ * sin importar si agregó espacios o saltos de línea
+ * 
+ * @param {string} code - Código C# a normalizar
+ * @returns {string} Código normalizado
+ */
+function normalizeCode(code) {
+  if (!code) return "";
+  
+  return code
+    // Eliminar comentarios de múltiples líneas /* ... */
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    // Eliminar comentarios de una línea //...
+    .replace(/\/\/.*$/gm, "")
+    // Eliminar todos los espacios en blanco (espacios, tabs, saltos de línea)
+    .replace(/\s+/g, "")
+    // Convertir a minúsculas para comparación case-insensitive
+    .toLowerCase();
+}
+
+/**
  * GET /api/exercises/:id
  * Obtiene un ejercicio específico con todos sus tests
  * 
@@ -272,9 +300,9 @@ export const validateExercise = async (req, res) => {
       return res.status(400).json({ error: "Código requerido" });
     }
 
-    // Obtener información del ejercicio desde BD
+    // Obtener información del ejercicio desde BD (incluye code_template para comparar)
     const [exercise] = await pool.query(
-      "SELECT id, required_keywords, total_tests FROM exercise_activities WHERE id = ?",
+      "SELECT id, required_keywords, total_tests, code_template FROM exercise_activities WHERE id = ?",
       [id]
     );
 
@@ -292,6 +320,68 @@ export const validateExercise = async (req, res) => {
     const requiredKeywords = exerciseData.required_keywords?.split(",").map(k => k.trim()) || [];
     let functionName = requiredKeywords.length > 0 ? requiredKeywords[0] : null;
     let functionReturnType = null;
+
+    // Detectar si el usuario no modificó el código base
+    // Comparando versión normalizada (sin espacios ni comentarios)
+    const normalizedUserCode = normalizeCode(code);
+    const normalizedTemplateCode = normalizeCode(exerciseData.code_template);
+    const isUnmodifiedCode = normalizedUserCode === normalizedTemplateCode;
+
+    // Si el código no fue modificado, marcar todas las pruebas como fallidas inmediatamente
+    if (isUnmodifiedCode) {
+      const testResults = tests.map((test, i) => {
+        let inputDisplay = "";
+        try {
+          if (test.input_data) {
+            const parsed = JSON.parse(test.input_data);
+            if (Array.isArray(parsed)) {
+              inputDisplay = parsed.join(", ");
+            } else {
+              inputDisplay = String(parsed);
+            }
+          }
+        } catch (e) {
+          inputDisplay = test.input_data || "";
+        }
+
+        return {
+          test_number: i + 1,
+          input: inputDisplay,
+          expected: (test.expected_output || "").trim(),
+          actual: "",
+          passed: false,
+          description: test.description
+        };
+      });
+
+      // Registrar intento fallido en base de datos
+      if (userId) {
+        try {
+          await pool.query(
+            "INSERT INTO exercise_attempts (user_id, exercise_id, is_successful, passed_tests, total_tests, jdoodle_output) VALUES (?, ?, ?, ?, ?, ?)",
+            [userId, id, 0, 0, tests.length, "Código sin modificar - Todas las pruebas marcadas como fallidas"]
+          );
+
+          // Incrementar contador de fallos
+          await pool.query(
+            `INSERT INTO exercise_failure_count (user_id, exercise_id, failure_count)
+             VALUES (?, ?, 1)
+             ON DUPLICATE KEY UPDATE failure_count = failure_count + 1, last_attempt_at = NOW()`,
+            [userId, id]
+          );
+        } catch (dbError) {
+          console.error("Error saving attempt:", dbError);
+        }
+      }
+
+      return res.json({
+        is_successful: false,
+        passed_tests: 0,
+        total_tests: tests.length,
+        output: "Código sin modificar. Por favor, implementa la solución antes de ejecutar las pruebas.",
+        test_results: testResults
+      });
+    }
 
     // Validar que el nombre de función sea válido
     // Si required_keywords contiene un tipo primitivo (ej: 'long') o palabra reservada (ej: 'if'),
@@ -480,7 +570,18 @@ export const validateExercise = async (req, res) => {
       });
 
       const output = (response.data.output || "").trim();
-      const outputLines = output.split("\n").map(line => line.trim());
+      
+      // Filtrar líneas de compilación y warnings de JDoodle
+      // Estas líneas no son parte del output real del programa
+      const outputLines = output.split("\n")
+        .map(line => line.trim())
+        .filter(line => {
+          // Ignorar líneas de compilación y warnings
+          return !line.startsWith("Compilation succeeded") &&
+                 !line.includes("warning(s)") &&
+                 !line.startsWith("jdoodle.cs(") &&
+                 line.length > 0; // También ignorar líneas vacías
+        });
 
       jdoodleOutput = output;
 
